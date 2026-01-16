@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="verifyEmail.title">Verify Email - Hierarchical Auth System</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Apply theme immediately to prevent flash of unstyled content
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <!-- Load translations first, then i18n manager -->
+    <script src="translations.js"></script>
+    <script src="i18n.js"></script>
+    <script src="theme.js"></script>
+    <style>
+        body {
+            background-color: var(--background-alt);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .verify-email-container {
+            background: var(--background-color);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .verify-email-container h1 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .btn-primary {
+            padding: 12px 24px;
+            background: var(--primary-light);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-email-container">
+        <h1 data-i18n="verifyEmail.heading">Verify Email Address</h1>
+        
+        <div id="alertContainer"></div>
+        
+        <div id="loadingMessage" style="color: var(--text-light);">
+            <p data-i18n="verifyEmail.verifying">Verifying your email address...</p>
+        </div>
+        
+        <div id="successMessage" style="display: none;">
+            <p style="color: var(--primary-color); font-size: 1.2rem; font-weight: 600;" data-i18n="verifyEmail.success">
+                Email verified successfully!
+            </p>
+            <p style="color: var(--text-light); margin-top: 20px;" data-i18n="verifyEmail.successDescription">
+                Your email address has been verified. You can now use all features of the system.
+            </p>
+            <a href="login.html" class="btn-primary" style="margin-top: 20px;" data-i18n="verifyEmail.goToLogin">
+                Go to Login
+            </a>
+        </div>
+        
+        <div id="errorMessage" style="display: none;">
+            <p style="color: #dc3545; font-size: 1.1rem; font-weight: 600;" data-i18n="verifyEmail.error">
+                Verification Failed
+            </p>
+            <p style="color: var(--text-light); margin-top: 20px;" data-i18n="verifyEmail.errorDescription">
+                The verification link is invalid or has expired. Please request a new verification email.
+            </p>
+            <button id="resendBtn" class="btn-primary" style="margin-top: 20px;" data-i18n="verifyEmail.resendButton">
+                Resend Verification Email
+            </button>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        /**
+         * ============================================
+         * Email Verification JavaScript
+         * ============================================
+         * Automatically verifies email when page loads with token
+         */
+
+        // Get token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        // Auto-verify if token is present
+        if (token) {
+            verifyEmail(token);
+        } else {
+            // No token - show error
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+
+        async function verifyEmail(token) {
+            try {
+                const response = await fetch(`${window.location.origin}/api/auth/verify-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token })
+                });
+
+                const result = await response.json();
+
+                document.getElementById('loadingMessage').style.display = 'none';
+
+                if (result.success) {
+                    document.getElementById('successMessage').style.display = 'block';
+                } else {
+                    document.getElementById('errorMessage').style.display = 'block';
+                    showAlert(result.message || 'Verification failed', 'error');
+                }
+            } catch (error) {
+                console.error('Error verifying email:', error);
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+                showAlert('An error occurred during verification', 'error');
+            }
+        }
+
+        // Resend verification email
+        document.getElementById('resendBtn').addEventListener('click', async () => {
+            const email = prompt('Please enter your email address:');
+            if (!email) return;
+
+            try {
+                const response = await fetch(`${window.location.origin}/api/auth/resend-verification`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(result.message || 'Verification email sent!', 'success');
+                } else {
+                    showAlert(result.message || 'Error sending verification email', 'error');
+                }
+            } catch (error) {
+                console.error('Error resending verification:', error);
+                showAlert('An error occurred. Please try again.', 'error');
+            }
+        });
+
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alertContainer.appendChild(alert);
+        }
+    </script>
+</body>
+</html>
+
+

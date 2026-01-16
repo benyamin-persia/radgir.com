@@ -1,0 +1,486 @@
+/* ============================================
+   CSS Variables for Colors
+   Using ONLY the approved color palette - no other colors allowed
+   ============================================ */
+:root {
+    /* Primary colors - main UI elements and headings */
+    --primary-color: #243C4C;
+    --primary-dark: #30525C;
+    --primary-medium: #326080;
+    --primary-light: #5289AD;
+    
+    /* Secondary colors - supporting elements */
+    --secondary-color: #698696;
+    --secondary-light: #5C7E8F;
+    --secondary-very-light: #ACBCBF;
+    
+    /* Accent colors - interactive elements, links, buttons */
+    --accent-color: #00ACAC;
+    --accent-hover: #4C848D;
+    --accent-light: #B5D2E6;
+    
+    /* Text colors */
+    --text-color: #000000;
+    --text-dark: #464545;
+    --text-medium: #A6A7A2;
+    --text-light: #A2A2A2;
+    
+    /* Background colors */
+    --background-color: #FFFFFF;
+    --background-alt: #F4FCFB;
+    --background-cream: #FFF1E7;
+    --background-light: #DFDEDC;
+    
+    /* Border colors */
+    --border-color: #D4DDE2;
+    --border-light: #ACBCBF;
+    --border-medium: #A6A7A2;
+    
+    /* Status colors - for badges, alerts, and special states */
+    --color-orange: #C35627;
+    --color-orange-light: #D6794D;
+    --color-brown: #805232;
+    --color-brown-light: #DCAA89;
+    
+    /* Disabled state */
+    --color-disabled: #A2A2A2;
+}
+
+/* ============================================
+   Dark Mode CSS Variables
+   Dark theme color palette based on approved colors
+   ============================================ */
+[data-theme="dark"] {
+    /* Primary colors - adjusted for dark mode */
+    --primary-color: #5289AD;
+    --primary-dark: #326080;
+    --primary-medium: #30525C;
+    --primary-light: #243C4C;
+    
+    /* Secondary colors - adjusted for dark mode */
+    --secondary-color: #5C7E8F;
+    --secondary-light: #698696;
+    --secondary-very-light: #ACBCBF;
+    
+    /* Accent colors - brighter in dark mode */
+    --accent-color: #00ACAC;
+    --accent-hover: #4C848D;
+    --accent-light: #B5D2E6;
+    
+    /* Text colors - inverted for dark mode */
+    --text-color: #FFFFFF;
+    --text-dark: #E0E0E0;
+    --text-medium: #B0B0B0;
+    --text-light: #808080;
+    
+    /* Background colors - dark theme */
+    --background-color: #1A1A1A;
+    --background-alt: #242424;
+    --background-cream: #2A2A2A;
+    --background-light: #333333;
+    
+    /* Border colors - adjusted for dark mode */
+    --border-color: #404040;
+    --border-light: #505050;
+    --border-medium: #606060;
+    
+    /* Status colors - maintained for consistency */
+    --color-orange: #C35627;
+    --color-orange-light: #D6794D;
+    --color-brown: #805232;
+    --color-brown-light: #DCAA89;
+    
+    /* Disabled state */
+    --color-disabled: #606060;
+}
+
+/* ============================================
+   Reset and Base Styles
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    overflow-x: hidden;
+}
+
+/* ============================================
+   Header and Navigation
+   ============================================ */
+header {
+    position: sticky;
+    top: 0;
+    background-color: var(--background-color);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1000;
+}
+
+nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 400;
+}
+
+.nav-links a:hover {
+    color: var(--accent-color);
+}
+
+/* ============================================
+   Mobile Menu Toggle
+   ============================================ */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    gap: 4px;
+}
+
+.menu-toggle span {
+    width: 25px;
+    height: 2px;
+    background-color: var(--primary-color);
+}
+
+/* ============================================
+   Main Content Sections
+   ============================================ */
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.hero {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 4rem 0;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 300;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.hero p {
+    font-size: 1.25rem;
+    color: var(--text-light);
+}
+
+.content-section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.content-section:last-of-type {
+    border-bottom: none;
+}
+
+.content-section h2 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
+.content-section p {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    line-height: 1.8;
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+footer {
+    background-color: var(--background-alt);
+    padding: 2rem;
+    text-align: center;
+    margin-top: 4rem;
+    border-top: 1px solid var(--border-color);
+}
+
+footer p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   Responsive Design - Mobile First Approach
+   ============================================ */
+
+/* Tablet Styles */
+@media (max-width: 768px) {
+    nav {
+        padding: 1rem;
+    }
+
+    .nav-links {
+        position: fixed;
+        top: 60px;
+        left: -100%;
+        width: 100%;
+        height: calc(100vh - 60px);
+        background-color: var(--background-color);
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 2rem;
+        gap: 2rem;
+    }
+
+    .nav-links.active {
+        left: 0;
+    }
+
+    .menu-toggle {
+        display: flex;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero p {
+        font-size: 1.1rem;
+    }
+
+    .content-section {
+        padding: 3rem 0;
+    }
+
+    .content-section h2 {
+        font-size: 2rem;
+    }
+
+    main {
+        padding: 0 1rem;
+    }
+}
+
+/* Mobile Styles */
+@media (max-width: 480px) {
+    .hero {
+        min-height: 60vh;
+        padding: 2rem 0;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+    }
+
+    .content-section {
+        padding: 2rem 0;
+    }
+
+    .content-section h2 {
+        font-size: 1.75rem;
+    }
+
+    .content-section p {
+        font-size: 1rem;
+    }
+
+    nav {
+        padding: 0.75rem 1rem;
+    }
+
+    .logo {
+        font-size: 1.25rem;
+    }
+}
+
+
+/* ============================================
+   Theme Toggle Button - Auto-hide with hover reveal
+   ============================================ */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    background-color: var(--background-color);
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+}
+
+/* Show button on hover with scale effect */
+.theme-toggle:hover {
+    transform: translateX(-50%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-color: var(--accent-color);
+}
+
+/* Dark mode specific adjustments for toggle button */
+[data-theme="dark"] .theme-toggle {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.theme-toggle:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--text-color);
+    transition: fill 0.3s ease;
+}
+
+.theme-toggle:hover svg {
+    fill: var(--accent-color);
+}
+
+/* Keep button visible when it's focused (keyboard navigation) */
+.theme-toggle:focus {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* Hide sun icon in dark mode, show moon icon */
+[data-theme="dark"] .theme-toggle .sun-icon {
+    display: none;
+}
+
+[data-theme="dark"] .theme-toggle .moon-icon {
+    display: block;
+}
+
+/* Hide moon icon in light mode, show sun icon */
+.theme-toggle .sun-icon {
+    display: block;
+}
+
+.theme-toggle .moon-icon {
+    display: none;
+}
+
+/* ============================================
+   Country Switcher (in Filters Section)
+   ============================================ */
+/* Country switcher is now part of the filters section */
+/* Styles are defined in index.html inline styles */
+
+/* ============================================
+   RTL (Right-to-Left) Support
+   ============================================ */
+[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .nav-links {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .listings-sidebar {
+    border-left: none;
+    border-right: 1px solid var(--border-color);
+}
+
+[dir="rtl"] .filter-group input,
+[dir="rtl"] .filter-group select {
+    text-align: right;
+}
+
+[dir="rtl"] .listing-card-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .listings-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .dashboard-header-content,
+[dir="rtl"] .portal-header-content {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .dashboard-nav-links,
+[dir="rtl"] .portal-nav-links {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .form-actions {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .actions-bar {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] table {
+    direction: rtl;
+}
+
+[dir="rtl"] th,
+[dir="rtl"] td {
+    text-align: right;
+}
+
+/* ============================================
+   Accessibility - Focus States
+   ============================================ */
+a:focus,
+button:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.theme-toggle:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+

@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="dashboard.title">Dashboard - Hierarchical Auth System</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Apply theme immediately to prevent flash of unstyled content
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <!-- Load translations first, then i18n manager -->
+    <script src="translations.js"></script>
+    <script src="i18n.js"></script>
+    <script src="theme.js"></script>
+    <style>
+        body {
+            background-color: var(--background-alt);
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            background: var(--primary-light);
+            color: white;
+            padding: 20px 0;
+            margin-top: 0;
+        }
+
+        .dashboard-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .dashboard-header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        /* Navigation links in dashboard header */
+        .dashboard-nav-links {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+        }
+
+        .dashboard-nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.95rem;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .dashboard-nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .dashboard-nav-links a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .dashboard-nav-links button {
+            padding: 8px 16px;
+            background-color: var(--background-color);
+            color: var(--primary-light);
+            border: 1px solid var(--background-color);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-nav-links button:hover {
+            background-color: var(--background-alt);
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background: var(--background-color);
+            color: var(--primary-light);
+            border: 1px solid var(--background-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: var(--background-alt);
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .profile-card {
+            background: var(--background-color);
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-card h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .profile-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            padding: 15px;
+            background: var(--background-alt);
+            border-radius: 5px;
+        }
+
+        .info-item label {
+            display: block;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .info-item .value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-almighty { background: #C35627; color: white; }
+        .badge-superadmin { background: #326080; color: white; }
+        .badge-admin { background: #5289AD; color: white; }
+        .badge-manager { background: #00ACAC; color: white; }
+        .badge-user { background: #A2A2A2; color: white; }
+        .badge-guest { background: #F4FCFB; color: var(--text-color); }
+
+        /* Posts Section Styles */
+        .posts-section {
+            background: var(--background-color);
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .posts-section h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .posts-header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .posts-search {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--background-alt);
+            color: var(--text-color);
+            font-size: 0.9rem;
+            min-width: 200px;
+        }
+
+        .posts-list {
+            margin-top: 20px;
+        }
+
+        .post-card {
+            background: var(--background-alt);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .post-card:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .post-card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .post-card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-edit {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: var(--primary-color);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .post-card-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .post-card-field {
+            padding: 10px;
+            background: var(--background-color);
+            border-radius: 5px;
+        }
+
+        .post-card-field label {
+            display: block;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .post-card-field .value {
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        .post-card-images {
+            display: flex;
+            gap: 0.5rem;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .person-thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .person-thumbnail:hover {
+            border-color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .post-card-tags {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .person-tag {
+            display: inline-block;
+            background: var(--primary-light);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .post-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .post-status.active {
+            background: #28a745;
+            color: white;
+        }
+
+        .post-status.inactive {
+            background: #6c757d;
+            color: white;
+        }
+
+        .loading-posts, .no-posts {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: var(--background-color);
+            color: var(--text-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--primary-light);
+            color: white;
+            border-color: var(--primary-light);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Image Modal Styles */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            margin: auto;
+        }
+
+        .image-modal-content img {
+            width: 100%;
+            height: auto;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .image-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10001;
+        }
+
+        .image-modal-close:hover {
+            color: #bbb;
+        }
+
+        .more-images {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--background-alt);
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .more-images:hover {
+            background: var(--primary-light);
+            color: white;
+            border-color: var(--primary-light);
+        }
+    </style>
+</head>
+<body>
+    <!-- Dashboard Header with Navigation -->
+    <div class="dashboard-header">
+        <div class="dashboard-header-content">
+            <div class="dashboard-header-left">
+                <h1 data-i18n="dashboard.heading">Dashboard</h1>
+                <!-- Navigation links will be populated by navigation.js -->
+                <ul class="dashboard-nav-links">
+                    <!-- Navigation links will be populated by navigation.js -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <div class="profile-card">
+            <h2 data-i18n="dashboard.profileHeading">User Profile</h2>
+            <div id="loadingIndicator" style="text-align: center; padding: 40px; color: var(--text-light);" data-i18n="dashboard.loadingProfile">
+                Loading profile...
+            </div>
+            <div id="profileContent" style="display: none;">
+                <div class="profile-info" id="profileInfo">
+                    <!-- Profile information will be loaded here -->
+                </div>
+                
+                <!-- Email Verification Status -->
+                <div id="emailVerificationStatus" style="margin-top: 20px; padding: 15px; background: var(--background-alt); border-radius: 5px; display: none;">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                
+                <!-- Data Privacy Section -->
+                <div style="margin-top: 20px; padding: 20px; background: var(--background-alt); border-radius: 5px; border-top: 2px solid var(--primary-color);">
+                    <h3 style="margin-top: 0; color: var(--primary-color);" data-i18n="dashboard.dataPrivacy">Data Privacy</h3>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button onclick="exportUserData()" class="btn-edit" style="width: 100%;" data-i18n="dashboard.exportData">Export My Data</button>
+                        <button onclick="viewActivityLogs()" class="btn-edit" style="width: 100%;" data-i18n="dashboard.viewActivity">View Activity Logs</button>
+                        <button onclick="deleteAccount()" class="btn-delete" style="width: 100%;" data-i18n="dashboard.deleteAccount">Delete My Account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts Section -->
+        <div class="posts-section">
+            <h2>
+                <span data-i18n="dashboard.myPosts">My Posts</span>
+                <div class="posts-header-actions">
+                    <input type="text" id="postsSearch" class="posts-search" placeholder="Search posts..." data-i18n-placeholder="dashboard.searchPosts">
+                    <a href="create-person.html" class="btn-edit" style="text-decoration: none;" data-i18n="dashboard.createNewPost">Create New Post</a>
+                </div>
+            </h2>
+            <div id="postsLoading" class="loading-posts" style="display: none;" data-i18n="dashboard.loadingPosts">
+                Loading posts...
+            </div>
+            <div id="postsList" class="posts-list">
+                <!-- Posts will be loaded here -->
+            </div>
+            <div id="postsPagination" class="pagination" style="display: none;">
+                <!-- Pagination will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="image-modal" style="display: none;">
+        <div class="image-modal-content">
+            <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+            <img id="modalImage" src="" alt="Full size image">
+        </div>
+    </div>
+
+    <!-- Authentication and Navigation Scripts -->
+    <script src="auth.js"></script>
+    <script src="navigation.js"></script>
+    <script src="dashboard.js"></script>
+    <script>
+        /**
+         * ============================================
+         * Dashboard JavaScript
+         * ============================================
+         * Loads and displays user profile information
+         */
+
+        // Check authentication on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Check if user is authenticated
+            if (!authAPI.isAuthenticated()) {
+                console.log('User not authenticated, redirecting to login');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = authAPI.getCurrentUser();
+            
+            // Almighty users can also use the dashboard to see their posts
+            // They have access to both dashboard and portal
+            // No redirect needed - let them use the dashboard
+
+            // Load user profile
+            await loadProfile();
+        });
+
+        /**
+         * Load user profile information
+         */
+        async function loadProfile() {
+            try {
+                console.log('Loading user profile...');
+                
+                const response = await authAPI.getCurrentUserInfo();
+
+                if (response.success) {
+                    const user = response.data.user;
+                    displayProfile(user);
+                }
+            } catch (error) {
+                // Comprehensive error handling for profile loading
+                console.error('Error loading profile:', error);
+                
+                // Extract error message based on error type and status
+                let errorMessage = 'Error loading profile';
+                
+                // If token is invalid or expired, redirect to login
+                if (error.status === 401) {
+                    errorMessage = languageManager.getTranslation('dashboard.sessionExpired') || 'Session expired. Please login again.';
+                    alert(errorMessage);
+                    authAPI.logout();
+                    return; // Exit early as we're redirecting
+                } else if (error.status === 403) {
+                    // Forbidden
+                    errorMessage = languageManager.getTranslation('dashboard.accessDenied') || 'Access denied.';
+                    alert(errorMessage);
+                    authAPI.logout();
+                    return;
+                } else if (error.status === 404) {
+                    // User not found
+                    errorMessage = languageManager.getTranslation('dashboard.userNotFound') || 'User profile not found.';
+                } else if (error.status === 500) {
+                    // Server error
+                    errorMessage = languageManager.getTranslation('dashboard.serverError') || 'Server error. Please try again later.';
+                } else if (error.message) {
+                    // Use specific error message if available
+                    errorMessage = `Error: ${error.message}`;
+                }
+                
+                // Display error message to user
+                document.getElementById('loadingIndicator').textContent = errorMessage;
+            }
+        }
+
+        /**
+         * Display user profile information
+         * 
+         * @param {Object} user - User object
+         */
+        function displayProfile(user) {
+            const profileInfo = document.getElementById('profileInfo');
+            
+            // Get badge class for role
+            const roleBadgeClass = `badge-${user.role.toLowerCase()}`;
+            
+            // Format dates
+            const createdAt = new Date(user.createdAt).toLocaleString();
+            const updatedAt = new Date(user.updatedAt).toLocaleString();
+            const lastLogin = user.lastLogin 
+                ? new Date(user.lastLogin).toLocaleString() 
+                : 'Never';
+
+            // Get translations for labels
+            const t = languageManager.getTranslations(languageManager.getCurrentLanguage());
+            const dashboardT = t ? t.dashboard : null;
+            const commonT = t ? t.common : null;
+            
+            const usernameLabel = dashboardT ? dashboardT.usernameLabel : 'Username';
+            const emailLabel = dashboardT ? dashboardT.emailLabel : 'Email';
+            const roleLabel = dashboardT ? dashboardT.roleLabel : 'Role';
+            const levelLabel = dashboardT ? dashboardT.levelLabel : 'Level';
+            const statusLabel = dashboardT ? dashboardT.statusLabel : 'Status';
+            const lastLoginLabel = dashboardT ? dashboardT.lastLoginLabel : 'Last Login';
+            const accountCreatedLabel = dashboardT ? dashboardT.accountCreatedLabel : 'Account Created';
+            const lastUpdatedLabel = dashboardT ? dashboardT.lastUpdatedLabel : 'Last Updated';
+            const activeText = commonT ? commonT.active : 'Active';
+            const inactiveText = commonT ? commonT.inactive : 'Inactive';
+            const neverText = dashboardT ? dashboardT.never : 'Never';
+            
+            profileInfo.innerHTML = `
+                <div class="info-item">
+                    <label>${usernameLabel}</label>
+                    <div class="value">${escapeHtml(user.username)}</div>
+                </div>
+                <div class="info-item">
+                    <label>${emailLabel}</label>
+                    <div class="value">${escapeHtml(user.email)}</div>
+                </div>
+                <div class="info-item">
+                    <label>${roleLabel}</label>
+                    <div class="value">
+                        <span class="badge ${roleBadgeClass}">${escapeHtml(user.role)}</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <label>${levelLabel}</label>
+                    <div class="value">${user.level}</div>
+                </div>
+                <div class="info-item">
+                    <label>${statusLabel}</label>
+                    <div class="value">${user.isActive ? activeText : inactiveText}</div>
+                </div>
+                <div class="info-item">
+                    <label>${lastLoginLabel}</label>
+                    <div class="value">${lastLogin === 'Never' ? neverText : lastLogin}</div>
+                </div>
+                <div class="info-item">
+                    <label>${accountCreatedLabel}</label>
+                    <div class="value">${createdAt}</div>
+                </div>
+                <div class="info-item">
+                    <label>${lastUpdatedLabel}</label>
+                    <div class="value">${updatedAt}</div>
+                </div>
+            `;
+
+            // Show profile content, hide loading
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('profileContent').style.display = 'block';
+            
+            // Show email verification status
+            displayEmailVerificationStatus(user);
+        }
+        
+        /**
+         * Display email verification status
+         */
+        function displayEmailVerificationStatus(user) {
+            const statusDiv = document.getElementById('emailVerificationStatus');
+            if (!statusDiv) return;
+            
+            if (user.emailVerified) {
+                statusDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px; color: #28a745;">
+                        <span style="font-size: 1.2rem;">✓</span>
+                        <span><strong>Email Verified</strong> - Your email address has been verified.</span>
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px; color: #ffc107;">
+                            <span style="font-size: 1.2rem;">⚠</span>
+                            <span><strong>Email Not Verified</strong> - Please verify your email address.</span>
+                        </div>
+                        <button onclick="resendVerificationEmail()" class="btn-edit" style="padding: 6px 12px; font-size: 0.9rem;">
+                            Resend Verification Email
+                        </button>
+                    </div>
+                `;
+            }
+            statusDiv.style.display = 'block';
+        }
+        
+        /**
+         * Resend verification email
+         */
+        async function resendVerificationEmail() {
+            try {
+                const user = authAPI.getCurrentUser();
+                if (!user || !user.email) {
+                    alert('Email address not found');
+                    return;
+                }
+                
+                const response = await fetch(`${window.location.origin}/api/auth/resend-verification`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authAPI.getToken()}`
+                    },
+                    body: JSON.stringify({ email: user.email })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Verification email sent! Please check your inbox.');
+                } else {
+                    alert(result.message || 'Error sending verification email');
+                }
+            } catch (error) {
+                console.error('Error resending verification:', error);
+                alert('Error sending verification email');
+            }
+        }
+        
+        /**
+         * Export user data
+         */
+        async function exportUserData() {
+            if (!confirm('This will export all your data. Continue?')) return;
+            
+            try {
+                const token = authAPI.getToken();
+                const response = await fetch(`${window.location.origin}/api/privacy/export`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Create download link
+                    const dataStr = JSON.stringify(result.data, null, 2);
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(dataBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `user-data-export-${new Date().toISOString().split('T')[0]}.json`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    alert('Data export downloaded successfully!');
+                } else {
+                    alert(result.message || 'Error exporting data');
+                }
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                alert('Error exporting data');
+            }
+        }
+        
+        /**
+         * View activity logs
+         */
+        async function viewActivityLogs() {
+            try {
+                const token = authAPI.getToken();
+                const response = await fetch(`${window.location.origin}/api/privacy/activity`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Display activity logs in a modal or new page
+                    const logs = result.data.logs;
+                    const logsText = logs.map(log => 
+                        `${new Date(log.createdAt).toLocaleString()} - ${log.action}: ${log.description} ${log.success ? '✓' : '✗'}`
+                    ).join('\n');
+                    
+                    alert(`Your Recent Activity:\n\n${logsText}\n\n(Showing ${logs.length} of ${result.data.pagination.total} logs)`);
+                } else {
+                    alert(result.message || 'Error fetching activity logs');
+                }
+            } catch (error) {
+                console.error('Error fetching activity logs:', error);
+                alert('Error fetching activity logs');
+            }
+        }
+        
+        /**
+         * Delete account
+         */
+        async function deleteAccount() {
+            const password = prompt('Enter your password to confirm account deletion:');
+            if (!password) return;
+            
+            const confirmText = prompt('Type DELETE to confirm permanent account deletion:');
+            if (confirmText !== 'DELETE') {
+                alert('Account deletion cancelled');
+                return;
+            }
+            
+            if (!confirm('⚠️ WARNING: This will permanently delete your account and ALL associated data. This action cannot be undone. Are you absolutely sure?')) {
+                return;
+            }
+            
+            try {
+                const token = authAPI.getToken();
+                const response = await fetch(`${window.location.origin}/api/privacy/delete`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password, confirm: confirmText })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Account deleted successfully. You will be logged out now.');
+                    authAPI.logout();
+                    window.location.href = 'login.html';
+                } else {
+                    alert(result.message || 'Error deleting account');
+                }
+            } catch (error) {
+                console.error('Error deleting account:', error);
+                alert('Error deleting account');
+            }
+        }
+
+        /**
+         * Escape HTML to prevent XSS
+         * 
+         * @param {string} text - Text to escape
+         * @returns {string} Escaped text
+         */
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
+

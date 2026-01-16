@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="login.title">Login - Hierarchical Auth System</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Apply theme immediately to prevent flash of unstyled content
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <!-- Load translations first, then i18n manager -->
+    <script src="translations.js"></script>
+    <script src="i18n.js"></script>
+    <script src="theme.js"></script>
+    <style>
+        /* ============================================
+           Login Page Specific Styles
+           ============================================ */
+        body {
+            min-height: 100vh;
+            background: var(--primary-light);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Login container positioning and styling */
+        /* Center the login container vertically and horizontally */
+        .login-container {
+            background: var(--background-color);
+            border-radius: 10px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin: auto;
+            flex: 0 0 auto;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn:disabled {
+            background-color: var(--color-disabled);
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.error {
+            background-color: #FFF1E7;
+            color: #C35627;
+            border: 1px solid #DCAA89;
+        }
+
+        .alert.success {
+            background-color: #F4FCFB;
+            color: #00ACAC;
+            border: 1px solid #B5D2E6;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading-spinner {
+            border: 3px solid #DFDEDC;
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            margin: 0 auto;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .register-link a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <!-- Navigation will be dynamically populated based on authentication status -->
+    <header>
+        <nav>
+            <div class="logo">🔐 Auth System</div>
+            <ul class="nav-links">
+                <!-- Navigation links will be populated by navigation.js -->
+            </ul>
+            <!-- Mobile menu toggle button -->
+            <div class="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="login-container">
+        <div class="login-header">
+            <h1 data-i18n="login.heading">Login</h1>
+            <p data-i18n="login.subtitle">Enter your credentials to access the system</p>
+        </div>
+
+        <!-- Alert messages for errors/success -->
+        <div id="alert" class="alert"></div>
+
+        <!-- Login Form -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username" data-i18n="login.usernameLabel">Username or Email</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required 
+                    autocomplete="username"
+                    data-i18n="login.usernamePlaceholder"
+                    data-i18n-attr="placeholder"
+                    placeholder="Enter your username or email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password" data-i18n="login.passwordLabel">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    autocomplete="current-password"
+                    data-i18n="login.passwordPlaceholder"
+                    data-i18n-attr="placeholder"
+                    placeholder="Enter your password"
+                >
+            </div>
+
+            <button type="submit" class="btn" id="loginBtn" data-i18n="login.submitButton">Login</button>
+        </form>
+
+        <!-- Forgot Password Link -->
+        <div style="text-align: center; margin-top: 15px;">
+            <a href="forgot-password.html" style="color: var(--primary-color); text-decoration: none; font-size: 0.9rem;" data-i18n="login.forgotPassword">Forgot Password?</a>
+        </div>
+
+        <!-- Loading indicator -->
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p data-i18n="login.loading">Logging in...</p>
+        </div>
+
+        <div class="register-link">
+            <span data-i18n="login.noAccount">Don't have an account?</span> <a href="register.html" data-i18n="login.registerLink">Register here</a>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Script -->
+    <script src="script.js"></script>
+    <!-- Authentication and Navigation Scripts -->
+    <script src="auth.js"></script>
+    <script src="navigation.js"></script>
+    <script>
+        /**
+         * ============================================
+         * Login Page JavaScript
+         * ============================================
+         * Handles user login and redirects based on role
+         */
+
+        // Get DOM elements
+        const loginForm = document.getElementById('loginForm');
+        const alertDiv = document.getElementById('alert');
+        const loadingDiv = document.getElementById('loading');
+        const loginBtn = document.getElementById('loginBtn');
+
+        /**
+         * Show alert message
+         * @param {string} message - Message to display
+         * @param {string} type - Alert type: 'error' or 'success'
+         */
+        function showAlert(message, type = 'error') {
+            alertDiv.textContent = message;
+            alertDiv.className = `alert ${type}`;
+            alertDiv.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        /**
+         * Handle login form submission
+         */
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            // Get form values
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Validate input
+            if (!username || !password) {
+                const fillAllFields = languageManager.getTranslation('login.fillAllFields') || 'Please fill in all fields';
+                showAlert(fillAllFields);
+                return;
+            }
+
+            // Show loading state
+            loadingDiv.style.display = 'block';
+            loginBtn.disabled = true;
+            alertDiv.style.display = 'none';
+
+            try {
+                console.log('Attempting login for:', username);
+
+                // Call login API
+                const response = await authAPI.login(username, password);
+
+                if (response.success) {
+                    console.log('Login successful:', response.data.user);
+
+                    // Store token and user data in localStorage
+                    localStorage.setItem('token', response.data.token);
+                    localStorage.setItem('user', JSON.stringify(response.data.user));
+
+                    // Show success message
+                    const successMsg = languageManager.getTranslation('login.successMessage') || 'Login successful! Redirecting...';
+                    showAlert(successMsg, 'success');
+
+                    // Redirect to home page (people location map and listings)
+                    // All users go to the home page after login
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    // Show error message
+                    const errorMsg = response.message || languageManager.getTranslation('login.errorMessage') || 'Login failed';
+                    showAlert(errorMsg);
+                    loadingDiv.style.display = 'none';
+                    loginBtn.disabled = false;
+                }
+            } catch (error) {
+                // Comprehensive error handling for login
+                console.error('Login error:', error);
+                
+                // Extract error message from different error formats
+                let errorMessage = languageManager.getTranslation('login.errorMessage') || 'An error occurred during login';
+                
+                // Check if error has a status (from API response)
+                if (error.status === 401) {
+                    // Unauthorized - invalid credentials
+                    errorMessage = error.message || languageManager.getTranslation('login.invalidCredentials') || 'Invalid username or password';
+                } else if (error.status === 400) {
+                    // Bad request (validation errors)
+                    if (error.data && error.data.errors) {
+                        const validationErrors = error.data.errors
+                            .map(err => err.msg || err.message)
+                            .join(', ');
+                        errorMessage = validationErrors || error.message || 'Invalid input data';
+                    } else {
+                        errorMessage = error.message || 'Invalid input data';
+                    }
+                } else if (error.status === 403) {
+                    // Forbidden
+                    errorMessage = error.message || 'Access denied';
+                } else if (error.status === 500) {
+                    // Server error
+                    errorMessage = 'Server error. Please try again later.';
+                } else if (error.message) {
+                    // Use error message if available
+                    errorMessage = error.message;
+                }
+                
+                // Show error message to user
+                showAlert(errorMessage);
+                loadingDiv.style.display = 'none';
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Check if user is already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+
+            if (token && userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    console.log('User already logged in:', user.username);
+                    
+                    // Redirect to home page (people location map and listings)
+                    // All users go to the home page if already logged in
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                    // Clear invalid data
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="register.title">Register - Hierarchical Auth System</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Apply theme immediately to prevent flash of unstyled content
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <!-- Load translations first, then i18n manager -->
+    <script src="translations.js"></script>
+    <script src="i18n.js"></script>
+    <script src="theme.js"></script>
+    <style>
+        /* ============================================
+           Register Page Specific Styles
+           ============================================ */
+        body {
+            min-height: 100vh;
+            background: var(--primary-light);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Register container positioning and styling */
+        /* Center the register container vertically and horizontally */
+        .register-container {
+            background: var(--background-color);
+            border-radius: 10px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin: auto;
+            flex: 0 0 auto;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .register-header h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .register-header p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn:disabled {
+            background-color: var(--color-disabled);
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.error {
+            background-color: #FFF1E7;
+            color: #C35627;
+            border: 1px solid #DCAA89;
+        }
+
+        .alert.success {
+            background-color: #F4FCFB;
+            color: #00ACAC;
+            border: 1px solid #B5D2E6;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading-spinner {
+            border: 3px solid #DFDEDC;
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            margin: 0 auto;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .login-link a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <!-- Navigation will be dynamically populated based on authentication status -->
+    <header>
+        <nav>
+            <div class="logo">🔐 Auth System</div>
+            <ul class="nav-links">
+                <!-- Navigation links will be populated by navigation.js -->
+            </ul>
+            <!-- Mobile menu toggle button -->
+            <div class="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="register-container">
+        <div class="register-header">
+            <h1 data-i18n="register.heading">Register</h1>
+            <p data-i18n="register.subtitle">Create a new account</p>
+        </div>
+
+        <!-- Alert messages for errors/success -->
+        <div id="alert" class="alert"></div>
+
+        <!-- Registration Form -->
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username" data-i18n="register.usernameLabel">Username</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required 
+                    autocomplete="username"
+                    data-i18n="register.usernamePlaceholder"
+                    data-i18n-attr="placeholder"
+                    placeholder="Choose a username (3-30 characters)"
+                    minlength="3"
+                    maxlength="30"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="email" data-i18n="register.emailLabel">Email</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    autocomplete="email"
+                    data-i18n="register.emailPlaceholder"
+                    data-i18n-attr="placeholder"
+                    placeholder="Enter your email address"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password" data-i18n="register.passwordLabel">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    autocomplete="new-password"
+                    data-i18n="register.passwordPlaceholder"
+                    data-i18n-attr="placeholder"
+                    placeholder="Enter password (min 6 characters)"
+                    minlength="6"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword" data-i18n="register.confirmPasswordLabel">Confirm Password</label>
+                <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    name="confirmPassword" 
+                    required 
+                    autocomplete="new-password"
+                    data-i18n="register.confirmPasswordPlaceholder"
+                    data-i18n-attr="placeholder"
+                    placeholder="Confirm your password"
+                    minlength="6"
+                >
+            </div>
+
+            <button type="submit" class="btn" id="registerBtn" data-i18n="register.submitButton">Register</button>
+        </form>
+
+        <!-- Loading indicator -->
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p data-i18n="register.loading">Creating account...</p>
+        </div>
+
+        <div class="login-link">
+            <span data-i18n="register.hasAccount">Already have an account?</span> <a href="login.html" data-i18n="register.loginLink">Login here</a>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Script -->
+    <script src="script.js"></script>
+    <!-- Authentication and Navigation Scripts -->
+    <script src="auth.js"></script>
+    <script src="navigation.js"></script>
+    <script>
+        /**
+         * ============================================
+         * Registration Page JavaScript
+         * ============================================
+         * Handles user registration
+         */
+
+        // Get DOM elements
+        const registerForm = document.getElementById('registerForm');
+        const alertDiv = document.getElementById('alert');
+        const loadingDiv = document.getElementById('loading');
+        const registerBtn = document.getElementById('registerBtn');
+
+        /**
+         * Show alert message
+         * @param {string} message - Message to display
+         * @param {string} type - Alert type: 'error' or 'success'
+         */
+        function showAlert(message, type = 'error') {
+            alertDiv.textContent = message;
+            alertDiv.className = `alert ${type}`;
+            alertDiv.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        /**
+         * Handle registration form submission
+         */
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            // Get form values
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validate input
+            if (!username || !email || !password || !confirmPassword) {
+                const fillAllFields = languageManager.getTranslation('register.fillAllFields') || 'Please fill in all fields';
+                showAlert(fillAllFields);
+                return;
+            }
+
+            // Validate username format
+            if (username.length < 3 || username.length > 30) {
+                const invalidUsername = languageManager.getTranslation('register.invalidUsername') || 'Username must be between 3 and 30 characters';
+                showAlert(invalidUsername);
+                return;
+            }
+
+            // Validate username characters
+            if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                const invalidUsernameChars = languageManager.getTranslation('register.invalidUsernameChars') || 'Username can only contain letters, numbers, and underscores';
+                showAlert(invalidUsernameChars);
+                return;
+            }
+
+            // Validate email format
+            if (!/^\S+@\S+\.\S+$/.test(email)) {
+                const invalidEmail = languageManager.getTranslation('register.invalidEmail') || 'Please enter a valid email address';
+                showAlert(invalidEmail);
+                return;
+            }
+
+            // Validate password length
+            if (password.length < 6) {
+                const invalidPassword = languageManager.getTranslation('register.invalidPassword') || 'Password must be at least 6 characters';
+                showAlert(invalidPassword);
+                return;
+            }
+
+            // Validate password match
+            if (password !== confirmPassword) {
+                const passwordMismatch = languageManager.getTranslation('register.passwordMismatch') || 'Passwords do not match';
+                showAlert(passwordMismatch);
+                return;
+            }
+
+            // Show loading state
+            loadingDiv.style.display = 'block';
+            registerBtn.disabled = true;
+            alertDiv.style.display = 'none';
+
+            try {
+                console.log('Attempting registration for:', username);
+
+                // Call register API
+                const response = await authAPI.register(username, email, password);
+
+                if (response.success) {
+                    console.log('Registration successful:', response.data.user);
+
+                    // Store token and user data
+                    localStorage.setItem('token', response.data.token);
+                    localStorage.setItem('user', JSON.stringify(response.data.user));
+
+                    // Show success message
+                    const successMsg = languageManager.getTranslation('register.successMessage') || 'Registration successful! Redirecting...';
+                    showAlert(successMsg, 'success');
+
+                    // Redirect to home page (people location map and listings)
+                    // All users go to the home page after registration
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    // Show error message
+                    const errorMsg = response.message || 
+                        (response.errors && response.errors.map(e => e.msg).join(', ')) || 
+                        'Registration failed';
+                    showAlert(errorMsg);
+                    loadingDiv.style.display = 'none';
+                    registerBtn.disabled = false;
+                }
+            } catch (error) {
+                // Comprehensive error handling for registration
+                console.error('Registration error:', error);
+                
+                // Extract error message from different error formats
+                let errorMessage = languageManager.getTranslation('register.errorMessage') || 'An error occurred during registration';
+                
+                // Check if error has a status (from API response)
+                if (error.status === 409) {
+                    // Conflict error (duplicate username/email)
+                    errorMessage = error.message || languageManager.getTranslation('register.usernameExists') || 'Username or email already exists';
+                } else if (error.status === 400) {
+                    // Bad request (validation errors)
+                    if (error.data && error.data.errors) {
+                        // Extract validation error messages
+                        const validationErrors = error.data.errors
+                            .map(err => err.msg || err.message)
+                            .join(', ');
+                        errorMessage = validationErrors || error.message || 'Invalid input data';
+                    } else {
+                        errorMessage = error.message || 'Invalid input data';
+                    }
+                } else if (error.status === 401) {
+                    // Unauthorized (shouldn't happen during registration, but handle it)
+                    errorMessage = 'Authentication error. Please try again.';
+                } else if (error.status === 500) {
+                    // Server error
+                    errorMessage = 'Server error. Please try again later.';
+                } else if (error.message) {
+                    // Use error message if available
+                    errorMessage = error.message;
+                }
+                
+                // Show error message to user
+                showAlert(errorMessage);
+                loadingDiv.style.display = 'none';
+                registerBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
+
