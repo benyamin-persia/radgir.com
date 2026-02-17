@@ -6,8 +6,33 @@
  * It handles API calls, token management, and error handling
  */
 
-// API base URL - change this to match your server URL
-const API_BASE_URL = 'http://localhost:5000/api';
+// API base URL - use same-origin in production so the app works on custom domains
+// This avoids hard-coding localhost and prevents CSP/CORS issues on https://www.radgir.com
+// If you need to override (for debugging), set window.__API_BASE_URL before auth.js loads.
+const API_BASE_URL = (typeof window !== 'undefined' && window.__API_BASE_URL)
+    ? window.__API_BASE_URL
+    : `${window.location.origin}/api`;
+
+function trackAnalyticsEvent(eventName, payload = {}, immediate = false) {
+    if (typeof window === 'undefined') return;
+    try {
+        const rawUser = localStorage.getItem('user');
+        if (rawUser) {
+            const user = JSON.parse(rawUser);
+            if (user && String(user.role || '').toLowerCase() === 'almighty') {
+                return;
+            }
+        }
+    } catch (_) {
+        // Ignore user parsing issues and continue safely.
+    }
+    if (!window.analyticsTracker || typeof window.analyticsTracker.track !== 'function') return;
+    try {
+        window.analyticsTracker.track(eventName, payload, immediate);
+    } catch (_) {
+        // Never allow analytics failures to affect auth flow.
+    }
+}
 
 /**
  * Authentication API Object
@@ -121,6 +146,17 @@ const authAPI = {
                 
                 // Log the error for debugging
                 console.error(`API Error Response: ${options.method || 'GET'} ${url} - Status ${response.status}`, data);
+
+                if (!url.includes('/api/analytics/events')) {
+                    trackAnalyticsEvent('api_error', {
+                        statusCode: response.status,
+                        metadata: {
+                            endpoint,
+                            method: options.method || 'GET',
+                            message: errorMessage
+                        }
+                    });
+                }
                 
                 throw error;
             }
@@ -134,6 +170,16 @@ const authAPI = {
             
             // Check if it's a network error (server unreachable, CORS, etc.)
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                if (!url.includes('/api/analytics/events')) {
+                    trackAnalyticsEvent('api_error', {
+                        statusCode: 0,
+                        metadata: {
+                            endpoint,
+                            method: options.method || 'GET',
+                            message: 'Network error'
+                        }
+                    });
+                }
                 throw new Error('Network error. Please check if the server is running and accessible.');
             }
             
@@ -160,16 +206,34 @@ const authAPI = {
      */
     async register(username, email, password, role = 'User') {
         console.log('Registering new user:', username);
-        
-        return await this.request('/auth/register', {
-            method: 'POST',
-            body: JSON.stringify({
-                username,
-                email,
-                password,
-                role
-            })
-        });
+
+        try {
+            const response = await this.request('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({
+                    username,
+                    email,
+                    password,
+                    role
+                })
+            });
+
+            trackAnalyticsEvent('auth_register_success', {
+                metadata: {
+                    role
+                }
+            }, true);
+
+            return response;
+        } catch (error) {
+            trackAnalyticsEvent('auth_register_failed', {
+                statusCode: error.status || 0,
+                metadata: {
+                    message: error.message || 'register_failed'
+                }
+            }, true);
+            throw error;
+        }
     },
 
     /**
@@ -181,14 +245,36 @@ const authAPI = {
      */
     async login(username, password) {
         console.log('Logging in user:', username);
-        
-        return await this.request('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({
-                username,
-                password
-            })
-        });
+
+        try {
+            const response = await this.request('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({
+                    username,
+                    password
+                })
+            });
+
+            const loggedInRole = response?.data?.user?.role || null;
+            if (String(loggedInRole || '').toLowerCase() !== 'almighty') {
+                trackAnalyticsEvent('auth_login_success', {
+                    metadata: {
+                        username: username || '',
+                        role: loggedInRole
+                    }
+                }, true);
+            }
+
+            return response;
+        } catch (error) {
+            trackAnalyticsEvent('auth_login_failed', {
+                statusCode: error.status || 0,
+                metadata: {
+                    message: error.message || 'login_failed'
+                }
+            }, true);
+            throw error;
+        }
     },
 
     /**
@@ -210,6 +296,12 @@ const authAPI = {
      */
     logout() {
         console.log('Logging out user');
+        const currentUser = this.getCurrentUser();
+        trackAnalyticsEvent('auth_logout', {
+            metadata: {
+                role: currentUser?.role || null
+            }
+        }, true);
         // Clear authentication data from localStorage
         // This removes the JWT token and user information
         localStorage.removeItem('token');
@@ -253,8 +345,12 @@ const authAPI = {
     }
 };
 
+// Expose auth API on window for scripts that access window.authAPI explicitly.
+if (typeof window !== 'undefined') {
+    window.authAPI = authAPI;
+}
+
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = authAPI;
 }
-

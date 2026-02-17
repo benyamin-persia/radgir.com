@@ -1,6 +1,6 @@
 /**
  * ============================================
- * Main Server File - Hierarchical Auth System
+ * Main Server File - Radgir
  * ============================================
  * This is the entry point for the Express server
  * It initializes the database connection, sets up middleware,
@@ -26,8 +26,12 @@ const authRoutes = require('./routes/auth');
 const authSecurityRoutes = require('./routes/authSecurity');
 const userRoutes = require('./routes/users');
 const almightyRoutes = require('./routes/almighty');
+const analyticsAdminRoutes = require('./routes/analyticsAdmin');
 const peopleRoutes = require('./routes/people');
+const analyticsRoutes = require('./routes/analytics');
 const dataPrivacyRoutes = require('./routes/dataPrivacy');
+const roleUpgradeRoutes = require('./routes/roleUpgrade');
+const messageRoutes = require('./routes/messages');
 
 // Import middleware for error handling
 const errorHandler = require('./middleware/errorHandler');
@@ -38,6 +42,8 @@ const securityHeaders = require('./middleware/securityHeaders');
 
 // Import function to initialize Almighty user on startup
 const initializeAlmighty = require('./utils/initializeAlmighty');
+const { startAnalyticsRollupScheduler } = require('./utils/analyticsRollups');
+const { ensureDefaultPersonTags } = require('./utils/personTagCatalog');
 
 // Create Express application instance
 const app = express();
@@ -83,15 +89,26 @@ app.use('/api/users', userRoutes);
 
 // Almighty user routes (protected, requires Almighty role)
 // Only Almighty user can access these endpoints
+app.use('/api/almighty/analytics', analyticsAdminRoutes);
 app.use('/api/almighty', almightyRoutes);
 
 // People listings routes (for person location listings)
 // Some endpoints require authentication, others are public
 app.use('/api/people', peopleRoutes);
 
+// Analytics collection routes (public ingestion + health)
+app.use('/api/analytics', analyticsRoutes);
+
 // Data privacy routes (GDPR compliance, data export, deletion)
 // All routes require authentication
 app.use('/api/privacy', dataPrivacyRoutes);
+
+// Role upgrade request routes
+// Allows Guest users to request role upgrades
+app.use('/api/role-upgrade', roleUpgradeRoutes);
+
+// Direct messaging routes (authenticated inbox and conversations)
+app.use('/api/messages', messageRoutes);
 
 // Health check endpoint
 // Useful for monitoring and deployment verification
@@ -109,7 +126,7 @@ app.get('/api/health', (req, res) => {
 app.get('/api/info', (req, res) => {
     console.log('API info endpoint accessed');
     res.json({ 
-        message: 'Hierarchical Authentication System API',
+        message: 'Radgir API',
         version: '1.0.0',
         endpoints: {
             auth: '/api/auth',
@@ -134,6 +151,18 @@ app.use(express.static(__dirname, {
     setHeaders: (res, path) => {
         if (path.endsWith('.html')) {
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        }
+        // Avoid stale frontend bundles in browser cache during active development.
+        if (
+            path.endsWith('.html') ||
+            path.endsWith('.js') ||
+            path.endsWith('.css') ||
+            path.endsWith('/sw.js') ||
+            path.endsWith('\\sw.js')
+        ) {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
         }
     },
     // index option specifies which file to serve for directory requests
@@ -184,6 +213,13 @@ async function startServer() {
         await initializeAlmighty();
         console.log('✓ Almighty user initialized');
 
+        // Ensure default person classification tags exist.
+        await ensureDefaultPersonTags();
+        console.log('✓ Person tags catalog initialized');
+
+        // Keep daily analytics aggregates fresh for long-range reporting.
+        startAnalyticsRollupScheduler();
+
         // Start HTTP server and listen on specified port
         app.listen(PORT, () => {
             console.log('===========================================');
@@ -207,4 +243,3 @@ startServer();
 
 // Export app for testing purposes (if needed)
 module.exports = app;
-

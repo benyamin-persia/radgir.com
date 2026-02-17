@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="People Location Listing System - Find and list people by their geolocation">
-    <title data-i18n="index.title">People Locations - Map & Listings</title>
+    <meta name="theme-color" content="#243C4C">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Radgir">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="description" content="Radgir - Find and list people by their geolocation">
+    <title data-i18n="index.title">اطلاعات افراد وابسته به نظام کثیف جمهوری اسلامی</title>
     <link rel="stylesheet" href="styles.css">
     
     <!-- Leaflet CSS for map -->
@@ -43,11 +51,68 @@
             margin: 0;
             padding: 0;
             height: 100vh;
+            height: 100dvh;
+            min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
         }
         
+        /* Guest User Notification Banner */
+        .guest-notification-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            margin-top: 60px; /* Header height */
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: none; /* Hidden by default, shown only for Guest users */
+            position: relative;
+            z-index: 10;
+        }
+
+        .guest-notification-banner.show {
+            display: block;
+        }
+        
+        /* Adjust main container when banner is shown */
+        body:has(.guest-notification-banner.show) .main-container {
+            margin-top: 0;
+        }
+
+        .guest-notification-banner .banner-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .guest-notification-banner .banner-icon {
+            font-size: 1.5rem;
+        }
+
+        .guest-notification-banner .banner-text {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .guest-notification-banner .banner-link {
+            color: white;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .guest-notification-banner .banner-link:hover {
+            opacity: 0.8;
+        }
+
         /* Main container layout - 3 column horizontal layout */
         /* Order: Filters (1st), Listings (2nd), Map (3rd) */
         /* All sections are visible side by side on screens wider than 1000px */
@@ -56,16 +121,18 @@
             flex-direction: row; /* Always horizontal for 3-column layout */
             flex: 1;
             overflow: hidden;
-            margin-top: 60px; /* Header height */
+            margin-top: 0; /* No top margin, banner handles spacing */
             gap: 0; /* No gap, borders will separate sections */
             /* Ensure all children are visible */
             align-items: stretch;
+            min-height: 0;
         }
         
-        /* Filters Section (First Column) */
+        /* Filters Section (First Column) - same width as listings section so cards match */
         .filters-section-standalone {
-            width: 300px;
-            min-width: 250px;
+            width: 350px;
+            min-width: 300px;
+            max-width: 400px;
             background: var(--background-alt);
             border-right: 1px solid var(--border-color);
             display: flex;
@@ -76,22 +143,82 @@
         }
         
         .filters-header {
-            padding: 1rem;
-            background: var(--accent-color);
+            padding: 0.6rem 1rem;
+            background-color: rgba(92, 126, 143, 1);
             color: white;
-            border-bottom: 2px solid var(--accent-hover);
+            border-bottom: 2px solid rgba(105, 134, 150, 1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
         }
-        
+        .filters-header-main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
         .filters-header h3 {
             margin: 0;
             font-size: 1.2rem;
             font-weight: 600;
         }
+        .filters-header .listings-count,
+        .filters-header #noAddressCount,
+        .filters-header #mobileListingsCount {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+        }
+        .filters-header-main #noAddressCount { order: -1; }
+        .filters-header-main h3 { order: 1; margin: 0 0 0 auto; }
+        [dir="rtl"] .filters-header-main #noAddressCount { order: 1; margin-right: auto; }
+        [dir="rtl"] .filters-header-main h3 { order: -1; margin: 0; }
+        .filters-people-tabs {
+            display: none;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .people-tab-btn {
+            flex: 1;
+            min-width: 0;
+            border: 1px solid rgba(255, 255, 255, 0.38);
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            border-radius: 999px;
+            padding: 0.32rem 0.58rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+        }
+        .people-tab-btn.active {
+            border-color: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.24);
+        }
+        .people-tab-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.45rem;
+            padding: 0 0.25rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            line-height: 1.2;
+            background: rgba(0, 0, 0, 0.18);
+        }
+        [dir="rtl"] .filters-people-tabs { flex-direction: row-reverse; }
         
         .filters-content {
             flex: 1;
             overflow-y: auto;
-            padding: 1.25rem;
+            padding: 1rem;
+            position: relative;
             scrollbar-width: thin;
             scrollbar-color: var(--border-color) var(--background-alt);
         }
@@ -111,6 +238,119 @@
         
         .filters-content::-webkit-scrollbar-thumb:hover {
             background: var(--border-medium);
+        }
+        .people-tab-panel {
+            display: none;
+            width: 100%;
+        }
+        .people-tab-panel.active {
+            display: block;
+        }
+        .with-address-list,
+        .no-address-list {
+            width: 100%;
+        }
+        .with-address-cards {
+            display: block;
+            width: 100%;
+        }
+
+        /* People without address section (Persian title + listing-style cards) */
+        .no-address-list {
+            display: block;
+            width: 100%;
+            margin-bottom: 1rem;
+            /* Ensure list grows with content so cards never overlap */
+            min-height: min-content;
+        }
+        .no-address-section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            color: var(--text-dark);
+        }
+        /* Stack no-address cards in normal block flow so they never overlap */
+        .no-address-cards {
+            display: block;
+            width: 100%;
+        }
+        /* No-address cards: same height (143px) and layout as main listing cards – block flow, same padding */
+        .no-address-cards .listing-card,
+        .listing-card[data-no-address="1"] {
+            width: 100% !important;
+            height: 143px !important;
+            min-height: 143px;
+            max-height: 143px;
+            margin: 0 0 1rem 0 !important;
+            box-sizing: border-box;
+        }
+        .listing-card[data-no-address="1"] .listing-content,
+        .no-address-cards .listing-card .listing-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .listing-card[data-no-address="1"] .listing-actions,
+        .no-address-cards .listing-card .listing-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .listing-card[data-no-address="1"] .listing-vote-btn,
+        .listing-card[data-no-address="1"] .listing-comment-btn,
+        .listing-card[data-no-address="1"] .listing-share-btn,
+        .listing-card[data-no-address="1"] .listing-manage-btn,
+        .no-address-cards .listing-card .listing-vote-btn,
+        .no-address-cards .listing-card .listing-comment-btn,
+        .no-address-cards .listing-card .listing-share-btn,
+        .no-address-cards .listing-card .listing-manage-btn {
+            color: var(--text-dark);
+            opacity: 1;
+            visibility: visible;
+        }
+        .no-address-cards .listing-card .listing-votes {
+            display: flex;
+            gap: 0.25rem;
+        }
+        .no-address-cards .listing-card:last-child,
+        .no-address-cards .listing-card[data-no-address="1"]:last-child {
+            margin-bottom: 0 !important;
+        }
+        /* Compact styling for no-address card content so it fits in 143px like main cards */
+        .listing-card[data-no-address="1"] .listing-address-none,
+        .no-address-cards .listing-address-none {
+            margin: 0.1rem 0;
+            font-size: 0.8rem;
+            color: var(--text-medium);
+            font-style: italic;
+        }
+        .listing-card[data-no-address="1"] .listing-add-address-link,
+        .no-address-cards .listing-add-address-link {
+            display: inline-block;
+            font-size: 0.75rem;
+            color: var(--accent-color);
+            text-decoration: none;
+            margin: 0.1rem 0 0 0;
+        }
+        .listing-address-none {
+            margin: 0.15rem 0;
+            font-size: 0.85rem;
+            color: var(--text-medium);
+            font-style: italic;
+        }
+        .listing-add-address-link {
+            display: inline-block;
+            font-size: 0.8rem;
+            color: var(--accent-color);
+            text-decoration: none;
+            margin: 0.2rem 0 0 0;
+        }
+        .listing-add-address-link:hover {
+            text-decoration: underline;
+        }
+        .filters-hint {
+            font-size: 0.85rem;
+            color: var(--text-medium);
+            margin: 0.25rem 0 0 0;
         }
         
         /* Listings Section (Second Column) */
@@ -134,16 +374,16 @@
         
         .listings-section-standalone .listings-header {
             padding: 1rem;
-            background: var(--secondary-color);
+            background-color: rgba(92, 126, 143, 1);
             color: white;
-            border-bottom: 2px solid var(--secondary-light);
+            border-bottom: 2px solid rgba(105, 134, 150, 1);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0; /* Prevent header from shrinking */
         }
         
-        /* Map Container (Third Column) */
+        /* Map Container (Third Column): filter bar on top, map below */
         .map-container {
             flex: 1;
             position: relative;
@@ -152,6 +392,74 @@
             background: var(--background-alt);
             border: none;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        /* Filter bar at top of map (same style as listings header) */
+        .map-filters-bar {
+            height: 52px;
+            flex-shrink: 0;
+            padding: 0 1rem;
+            background: var(--secondary-color);
+            color: white;
+            border-bottom: 2px solid var(--secondary-light);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        /* Each filter: label and dropdown beside each other (row) */
+        .map-filters-bar .filter-group,
+        .map-filters-bar .country-switcher-group {
+            margin-bottom: 0;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+            width: auto;
+            min-width: 0;
+        }
+        /* Hide labels in map bar to save space; use select title/aria-label for tooltip and a11y */
+        .map-filters-bar .filter-group label,
+        .map-filters-bar .country-switcher-group label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        /* Persist 140px width for all map bar dropdowns (country, province, section, role) */
+        .map-filters-bar .filter-group select,
+        .map-filters-bar .country-switcher {
+            width: 140px;
+            box-sizing: border-box;
+            min-width: 140px;
+            height: 33px;
+            padding: 0.35rem 0.5rem;
+            font-size: 0.85rem;
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+        /* Explicit 140px by ID so browser/computed values cannot override */
+        .map-filters-bar #countrySwitcher,
+        .map-filters-bar #provinceFilter,
+        .map-filters-bar #sectionFilter,
+        .map-filters-bar #roleFilter {
+            width: 140px;
+            min-width: 140px;
+        }
+        .map-filters-bar .filter-group select option,
+        .map-filters-bar .country-switcher option {
+            background: var(--background-color);
+            color: var(--text-color);
         }
         
         /* Legacy support - hide old sidebar structure */
@@ -182,6 +490,8 @@
         }
         
         #map {
+            flex: 1;
+            min-height: 0;
             width: 100%;
             height: 100%;
             z-index: 1;
@@ -192,60 +502,42 @@
             display: none;
         }
         
+        /* Filter group: label and dropdown on the same row (beside each other) */
         .filter-group {
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
         
-        /* Country switcher specific styles */
+        /* Country switcher: same structure (label + select beside each other) */
         .country-switcher-group {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--border-color);
-            background: var(--background-color);
-            padding: 1rem;
-            border-radius: 6px;
-            border: 1px solid var(--border-light);
+            margin-bottom: 0.5rem;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
         
-        .country-switcher-group label {
-            font-weight: 600;
-            color: var(--primary-color);
-            margin-bottom: 0.75rem;
-        }
-        
-        .country-switcher {
-            font-weight: 600;
-            font-size: 1rem;
-            padding: 0.75rem;
-            background: var(--background-color);
-            border: 2px solid var(--accent-color);
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-        
-        .country-switcher:hover {
-            border-color: var(--accent-hover);
-            box-shadow: 0 2px 4px rgba(0, 172, 172, 0.2);
-        }
-        
-        .country-switcher:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(0, 172, 172, 0.1);
-        }
-        
+        .country-switcher-group label,
         .filter-group label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0;
+            flex-shrink: 0;
             color: var(--text-color);
             font-weight: 500;
             font-size: 0.9rem;
         }
         
         .filter-group input,
-        .filter-group select {
-            width: 100%;
-            padding: 0.65rem 0.75rem;
+        .filter-group select,
+        .country-switcher {
+            flex: 1;
+            min-width: 0;
+            padding: 0.5rem 0.65rem;
             border: 1.5px solid var(--border-color);
             border-radius: 6px;
             font-size: 0.9rem;
@@ -257,12 +549,14 @@
         }
         
         .filter-group input:hover,
-        .filter-group select:hover {
+        .filter-group select:hover,
+        .country-switcher:hover {
             border-color: var(--border-medium);
         }
         
         .filter-group input:focus,
-        .filter-group select:focus {
+        .filter-group select:focus,
+        .country-switcher:focus {
             outline: none;
             border-color: var(--accent-color);
             box-shadow: 0 0 0 3px rgba(0, 172, 172, 0.1);
@@ -276,9 +570,9 @@
         
         .filter-buttons {
             display: flex;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-            padding-top: 1rem;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding-top: 0.5rem;
             border-top: 1px solid var(--border-light);
         }
         
@@ -341,29 +635,49 @@
         }
         
         .listings-header {
+            height: 52px;
             padding: 1rem;
-            background: var(--secondary-color);
+            background-color: rgba(92, 126, 143, 1);
             color: white;
-            border-bottom: 2px solid var(--secondary-light);
+            border-bottom: 2px solid rgba(105, 134, 150, 1);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0; /* Prevent header from shrinking */
         }
         
-        .listings-header h2 {
-            margin: 0;
+        /* Wrapper fills space so h2 can sit on the right side of the header */
+        .listings-header > div {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        /* Count on left, heading (h2) on right side of header */
+        .listings-header > div .listings-count { order: -1; }
+        .listings-header > div h2 {
+            order: 1;
+            margin: 0 0 0 auto;
             font-size: 1.2rem;
             font-weight: 600;
         }
+        /* RTL: h2 on visual right (start), count on left (end) */
+        [dir="rtl"] .listings-header > div .listings-count { order: 1; margin-right: auto; }
+        [dir="rtl"] .listings-header > div h2 { order: -1; margin: 0; }
         
         .listings-count {
             color: rgba(255, 255, 255, 0.9);
             font-size: 0.9rem;
         }
         
-        /* Person listing card */
+        /* Person listing card - fixed height for consistent list appearance (persisted from browser preview) */
         .listing-card {
+            position: relative;
+            z-index: 0;
+            height: 143px;
             background: var(--background-alt);
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -371,6 +685,31 @@
             margin-bottom: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+        }
+        /* Share button: positioned at top-left corner of card (completely left and up) */
+        .listing-share-corner {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 2;
+        }
+        .listing-share-corner .listing-share-btn {
+            padding: 0.35rem 0.5rem;
+            min-width: 2rem;
+            min-height: 1.8rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 0 6px 0;
+        }
+        .listing-share-btn .share-icon {
+            width: 0.95rem;
+            height: 0.95rem;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
         
         .listing-card:hover {
@@ -383,6 +722,183 @@
             border-color: var(--accent-color);
             background: var(--accent-light);
         }
+        .listing-card.listing-menu-open {
+            z-index: 30;
+        }
+        
+        /* Row: content on left, image on right */
+        .listing-card-row {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        /* Content (name, address, tags, actions) - left side */
+        .listing-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .listing-content-top {
+            min-width: 0;
+        }
+        
+        /* Image container - right side, fixed size */
+        .listing-image {
+            flex-shrink: 0;
+        }
+        .listing-image img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .listing-content .listing-name { margin: 0 0 0.25rem; font-size: 1rem; font-weight: 600; color: var(--primary-color); }
+        .listing-content .listing-address { margin: 0.25rem 0; font-size: 0.85rem; color: var(--text-medium); }
+        .listing-address-clickable { cursor: pointer; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .listing-address-clickable:hover { color: var(--accent-color); }
+        /* Modal popup for address → بریم شکار */
+        .listing-address-popup-overlay { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1rem; box-sizing: border-box; }
+        .listing-address-popup-backdrop { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); cursor: pointer; }
+        .listing-address-popup-box { position: relative; background: var(--background-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; min-width: 200px; max-width: 90vw; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 1; }
+        .listing-address-popup-full { margin: 0 0 1rem; font-size: 0.95rem; color: var(--text-dark); line-height: 1.5; word-break: break-word; }
+        .listing-address-nav-btn { display: inline-block; padding: 0.5rem 1rem; background: var(--accent-color); color: white; font-size: 1rem; border: none; border-radius: 8px; cursor: pointer; width: 100%; }
+        .listing-address-nav-btn:hover { background: var(--accent-hover); color: white; }
+        .listing-content .listing-tags {
+            margin: 0.25rem 0;
+            font-size: 0.8rem;
+            color: var(--text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            max-width: 100%;
+        }
+        .listing-details {
+            margin-top: 0.3rem;
+            display: grid;
+            gap: 0.2rem;
+        }
+        .listing-detail-item {
+            margin: 0;
+            font-size: 0.78rem;
+            color: var(--text-dark);
+            line-height: 1.35;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+        .listing-detail-label {
+            color: var(--text-medium);
+            font-weight: 600;
+        }
+        .listing-detail-value {
+            color: var(--text-dark);
+        }
+        .listing-actions { display: flex; align-items: center; gap: 0.35rem; margin-top: 0.5rem; margin-right: -90px; flex-wrap: nowrap; }
+        .listing-votes { display: flex; gap: 0.25rem; }
+        .listing-vote-btn, .listing-comment-btn, .listing-share-btn, .listing-manage-btn { padding: 0.2rem 0.4rem; font-size: 0.85rem; border: none; background: none; color: var(--text-dark); cursor: pointer; display: inline-flex; align-items: center; gap: 0.2rem; }
+        .listing-bookmark-btn {
+            min-width: 1.45rem;
+            justify-content: center;
+            color: var(--text-medium);
+            opacity: 0.95;
+            transition: color 0.2s ease, opacity 0.2s ease;
+        }
+        .listing-bookmark-btn .bookmark-icon {
+            width: 1rem;
+            height: 1rem;
+            display: block;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+        }
+        .listing-bookmark-btn .bookmark-icon-filled {
+            fill: currentColor;
+            stroke: none;
+        }
+        .listing-bookmark-btn.active {
+            color: var(--text-dark);
+            opacity: 1;
+        }
+        .listing-more-wrap { position: relative; display: inline-flex; align-items: center; z-index: 1; }
+        .listing-more-wrap.open { z-index: 35; }
+        .listing-more-btn { font-size: 1rem; line-height: 1; min-width: 1.4rem; justify-content: center; }
+        .listing-more-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            display: none;
+            min-width: 170px;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            padding: 0.35rem;
+            z-index: 1205;
+        }
+        [dir="rtl"] .listing-more-menu { right: auto; left: 0; }
+        .listing-more-wrap.open .listing-more-menu { display: flex; flex-direction: column; gap: 0.2rem; }
+        .listing-more-item {
+            width: 100%;
+            border: none;
+            background: none;
+            color: var(--text-dark);
+            text-align: left;
+            font-size: 0.82rem;
+            padding: 0.35rem 0.45rem;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        [dir="rtl"] .listing-more-item { text-align: right; }
+        .listing-more-item:hover { background: var(--background-light); }
+        .listing-more-item-danger { color: #e57373; }
+        .listing-more-item-disabled { opacity: 0.8; cursor: default; }
+        /* Remove rectangular focus outline on action buttons when clicked (per UX request) */
+        .listing-vote-btn:focus, .listing-comment-btn:focus, .listing-share-btn:focus, .listing-manage-btn:focus { outline: none; }
+        .listing-vote-btn:hover, .listing-comment-btn:hover, .listing-share-btn:hover, .listing-manage-btn:hover { color: var(--accent-color); opacity: 0.9; }
+        .listing-vote-btn.active { color: var(--accent-color); }
+        .listing-comments-panel { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border-light); }
+        /* Comments popup modal (replaces inline panel) */
+        .listing-comments-modal-overlay { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 1rem; box-sizing: border-box; }
+        .listing-comments-modal-overlay[aria-hidden="true"] { display: none; }
+        .listing-comments-modal-backdrop { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); cursor: pointer; }
+        /* No border or extra lines on modal box; close via backdrop click only */
+        .listing-comments-modal-box { position: relative; background: var(--background-color); border: none; border-radius: 12px; padding: 1.25rem; min-width: 280px; max-width: 90vw; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 1; }
+        .listing-comments-modal-box .comments-list { max-height: 280px; }
+        /* No border around comment action icons (vote, edit, delete) inside the modal */
+        .listing-comments-modal-box .comment-vote-btn,
+        .listing-comments-modal-box .comment-edit-btn,
+        .listing-comments-modal-box .comment-delete-btn { border: none; background: transparent; }
+        .listing-comments-modal-box .comment-vote-btn:hover,
+        .listing-comments-modal-box .comment-edit-btn:hover,
+        .listing-comments-modal-box .comment-delete-btn:hover { background: var(--background-light); }
+        .listing-comments-modal-box .comment-vote-btn.active { background: var(--accent-light); border: none; }
+        /* No top border or horizontal divider on the panel inside the modal */
+        .listing-comments-modal-box .listing-comments-panel { margin-top: 0; padding-top: 0; border-top: none; }
+        /* Remove extra horizontal line before the form (keep separators between comments) */
+        .listing-comments-modal-box .comment-item:last-child { border-bottom: none; }
+        .listing-comments-modal-box .comment-form { border-top: none; }
+        .comments-list { max-height: 180px; overflow-y: auto; margin-bottom: 0.5rem; font-size: 0.85rem; }
+        .comment-item { padding: 0.35rem 0; border-bottom: 1px solid var(--border-light); }
+        .comment-body { margin-bottom: 0.25rem; }
+        .comment-actions { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+        .comment-vote-btn, .comment-edit-btn, .comment-delete-btn { padding: 0.2rem 0.4rem; font-size: 0.8rem; border: 1px solid var(--border-color); background: var(--background-color); color: var(--text-dark); border-radius: 4px; cursor: pointer; }
+        .comment-vote-btn:hover, .comment-edit-btn:hover, .comment-delete-btn:hover { background: var(--background-light); border-color: var(--accent-color); }
+        .comment-vote-btn.active { background: var(--accent-light); border-color: var(--accent-color); color: var(--accent-color); }
+        .comment-edit-input { width: 100%; padding: 0.3rem 0.5rem; font-size: 0.85rem; border: 1px solid var(--border-color); border-radius: 4px; margin: 0.25rem 0; box-sizing: border-box; }
+        .comment-save-btn, .comment-cancel-btn { padding: 0.2rem 0.5rem; font-size: 0.8rem; border-radius: 4px; cursor: pointer; }
+        .comment-save-btn { background: var(--accent-color); color: white; border: none; }
+        .comment-cancel-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-dark); }
+        .comment-form { display: flex; gap: 0.25rem; }
+        .comment-input { flex: 1; padding: 0.35rem 0.5rem; font-size: 0.85rem; border: 1px solid var(--border-color); border-radius: 6px; }
+        .comment-submit-btn { padding: 0.35rem 0.75rem; font-size: 0.85rem; background: var(--accent-color); color: white; border: none; border-radius: 6px; cursor: pointer; }
         
         .listing-card-header {
             display: flex;
@@ -496,6 +1012,20 @@
             transition: all 0.3s ease;
         }
         
+        /* Main image - larger and more prominent */
+        .person-main-image {
+            width: 150px;
+            height: 150px;
+            border: 3px solid var(--accent-color);
+            border-radius: 8px;
+        }
+        
+        /* Smaller thumbnails for additional images */
+        .person-thumbnail-small {
+            width: 60px;
+            height: 60px;
+        }
+        
         .person-thumbnail:hover {
             border-color: var(--accent-color);
             transform: scale(1.05);
@@ -564,6 +1094,186 @@
             color: #bbb;
         }
         
+        /* Image Carousel Styles */
+        .image-carousel-container {
+            position: relative;
+            width: min(94vw, 1100px);
+            max-width: 94vw;
+            height: 94vh;
+            max-height: 94vh;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0.8rem 0;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        
+        .image-carousel-content {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            flex: 1 1 auto;
+            min-height: 0;
+            max-height: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .image-carousel-content img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10002;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .carousel-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .carousel-prev {
+            left: 20px;
+        }
+        
+        .carousel-next {
+            right: 20px;
+        }
+        
+        .carousel-indicators {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .carousel-dot:hover {
+            background: rgba(255, 255, 255, 0.7);
+            transform: scale(1.2);
+        }
+        
+        .carousel-dot.active {
+            background: white;
+            border-color: white;
+            transform: scale(1.3);
+        }
+        
+        .carousel-counter {
+            margin-top: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .carousel-details {
+            width: 100%;
+            margin-top: 10px;
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.62);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            max-height: 30vh;
+            min-height: 120px;
+            overflow-y: auto;
+        }
+        .carousel-details-name {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .carousel-details-address,
+        .carousel-details-tags {
+            margin: 0.35rem 0 0;
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.95);
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+        .carousel-details .listing-details {
+            margin-top: 0.5rem;
+            gap: 0.25rem;
+        }
+        .carousel-details .listing-detail-item {
+            font-size: 0.84rem;
+            color: rgba(255, 255, 255, 0.95);
+        }
+        .carousel-details .listing-detail-label {
+            color: rgba(255, 255, 255, 0.82);
+        }
+        @media (max-width: 768px) {
+            .image-carousel-container {
+                width: 96vw;
+                max-width: 96vw;
+                height: 96vh;
+                max-height: 96vh;
+                padding: 0.45rem 0;
+            }
+            .image-carousel-content {
+                flex: 0 0 50vh;
+                max-height: 50vh;
+            }
+            .carousel-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 30px;
+            }
+            .carousel-prev {
+                left: 8px;
+            }
+            .carousel-next {
+                right: 8px;
+            }
+            .carousel-details {
+                max-height: 34vh;
+                min-height: 110px;
+                padding: 0.7rem 0.8rem;
+            }
+            .carousel-details .listing-detail-item {
+                font-size: 0.8rem;
+            }
+        }
+
         .no-listings {
             text-align: center;
             padding: 2rem;
@@ -579,10 +1289,10 @@
         /* Responsive design */
         /* Tablet responsive - Adjust column widths for medium screens */
         @media (max-width: 1600px) and (min-width: 1000px) {
-            /* Reduce column widths slightly to fit better */
+            /* Reduce column widths slightly; keep filters same width as listings so cards match */
             .filters-section-standalone {
-                width: 280px;
-                min-width: 250px;
+                width: 320px;
+                min-width: 280px;
             }
             
             .listings-section-standalone {
@@ -595,37 +1305,351 @@
             }
         }
         
-        /* Mobile responsive - Stack all sections vertically */
-        @media (max-width: 1000px) {
+        /* Collapsible section toggle button (desktop/tablet only) */
+        .section-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            min-width: 44px;
+            min-height: 44px;
+            transition: transform 0.3s ease;
+            touch-action: manipulation;
+        }
+        
+        .section-toggle.active {
+            transform: rotate(180deg);
+        }
+        
+        /* Mobile-only listings count: hidden on desktop */
+        .mobile-listings-count {
+            display: none;
+        }
+        
+        /* ============================================
+           Mobile layout: Map top 50% | Filters bottom 50%
+           No person list; only count (X مورد) in filters header
+           ============================================ */
+        @media (max-width: 768px) {
             .main-container {
                 flex-direction: column !important;
+                height: auto;
+                min-height: 0;
+                flex: 1;
+                overflow: hidden;
             }
             
-            .filters-section-standalone,
-            .listings-section-standalone,
+            /* Top half: Map */
             .map-container {
                 width: 100% !important;
                 min-width: 100% !important;
                 max-width: 100% !important;
-                height: auto;
-                order: initial !important;
-                border-left: none !important;
-                border-right: none !important;
-                border-top: 1px solid var(--border-color);
+                height: 50% !important;
+                min-height: 220px;
+                flex-shrink: 0;
+                order: 1;
+                border: none;
                 border-bottom: 1px solid var(--border-color);
             }
             
+            /* Bottom half: Filters */
             .filters-section-standalone {
-                max-height: 400px;
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+                height: 50% !important;
+                min-height: 220px;
+                flex-shrink: 0;
+                order: 2;
+                border: none;
+                border-top: 1px solid var(--border-color);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
+            }
+
+            .map-filters-bar {
+                min-height: 52px;
+                height: auto;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                padding: 0.35rem 0.75rem;
+            }
+
+            .map-filters-bar::-webkit-scrollbar {
+                display: none;
+            }
+
+            .map-filters-bar .filter-group,
+            .map-filters-bar .country-switcher-group {
+                flex: 0 0 auto;
+            }
+
+            /* Filters layout: 2x2 grid (Country|Province, Section|Role) – ~22px gap Section↔buttons */
+            .filters-content:not(.people-tabs-layout) {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-rows: auto auto auto;
+                gap: 0 10px;
+                row-gap: 0;
+                align-items: start;
+                padding: 0.4rem 0.75rem;
             }
             
+            .filter-group,
+            .country-switcher-group {
+                width: 100%;
+                margin: 0;
+            }
+            
+            .filter-group label,
+            .country-switcher-group label {
+                margin-bottom: 0.15rem;
+            }
+            
+            .filter-buttons {
+                grid-column: 1 / -1;
+                margin-top: 0;
+                padding-top: 4px;
+            }
+            
+            /* Keep label beside dropdown (row); cap height so long selects scroll */
+            .filters-content .filter-group:nth-child(2),
+            .filters-content .country-switcher-group + .filter-group {
+                max-height: 86px;
+                overflow: hidden;
+                flex-direction: row;
+            }
+            .filters-content .filter-group:nth-child(2) select,
+            .filters-content .country-switcher-group + .filter-group select {
+                max-height: 60px;
+                overflow-y: auto;
+            }
+            
+            .filters-content .filter-group:nth-child(3),
+            .filters-content .filter-group:nth-child(4) {
+                max-height: 86px;
+                overflow: hidden;
+                flex-direction: row;
+            }
+            .filters-content .filter-group:nth-child(3) select,
+            .filters-content .filter-group:nth-child(4) select {
+                max-height: 60px;
+                overflow-y: auto;
+            }
+            
+            /* Hide listings section entirely on mobile */
             .listings-section-standalone {
-                max-height: 400px;
+                display: none !important;
             }
             
+            /* Filters header: mobile tab mode */
+            .filters-header {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+                padding: 0.35rem 0.5rem 0;
+                cursor: default;
+                user-select: none;
+                -webkit-user-select: none;
+            }
+            .filters-header-main {
+                display: none;
+            }
+            .filters-people-tabs {
+                width: 100%;
+                display: flex;
+                align-items: stretch;
+                gap: 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+                background: transparent;
+            }
+            .filters-people-tabs .people-tab-btn {
+                border: none;
+                border-radius: 0;
+                background: transparent;
+                color: rgba(255, 255, 255, 0.85);
+                min-height: 42px;
+                padding: 0.5rem 0.65rem;
+                font-size: 0.86rem;
+                font-weight: 700;
+                justify-content: center;
+                border-bottom: 2px solid transparent;
+            }
+            .filters-people-tabs .people-tab-btn.active {
+                color: #ffffff;
+                background: rgba(255, 255, 255, 0.08);
+                border-bottom-color: #ffffff;
+            }
+            .filters-people-tabs .people-tab-count {
+                background: rgba(255, 255, 255, 0.16);
+                color: #ffffff;
+                min-width: 1.55rem;
+            }
+            
+            .filters-header .section-toggle {
+                display: none !important;
+            }
+            
+            .mobile-listings-count {
+                display: none;
+            }
+            
+            .filters-content {
+                flex: 1;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .filters-content.people-tabs-layout {
+                display: block;
+                padding: 0.5rem;
+            }
+            .filters-content.people-tabs-layout .people-tab-panel {
+                width: 100%;
+            }
+            .filters-content.people-tabs-layout .listing-card,
+            .filters-content.people-tabs-layout .no-address-cards .listing-card,
+            .filters-content.people-tabs-layout .listing-card[data-no-address="1"] {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                margin: 0 0 0.75rem 0 !important;
+                padding: 0.75rem;
+            }
+            .filters-content.people-tabs-layout .listing-card-row {
+                gap: 0.6rem;
+            }
+            .filters-content.people-tabs-layout .listing-content,
+            .filters-content.people-tabs-layout .listing-content-top {
+                min-width: 0;
+                overflow: hidden;
+            }
+            .filters-content.people-tabs-layout .listing-name,
+            .filters-content.people-tabs-layout .listing-address,
+            .filters-content.people-tabs-layout .listing-detail-item {
+                white-space: normal;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+            }
+            .filters-content.people-tabs-layout .listing-tags {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                word-break: normal;
+                overflow-wrap: normal;
+            }
+            .filters-content.people-tabs-layout .listing-detail-item {
+                font-size: 0.74rem;
+            }
+            .filters-content.people-tabs-layout .listing-actions {
+                margin-right: 0 !important;
+                margin-left: 0 !important;
+                width: 100%;
+                max-width: 100%;
+                flex-wrap: wrap;
+                row-gap: 0.25rem;
+            }
+            .filters-content.people-tabs-layout .listing-votes {
+                flex-wrap: wrap;
+            }
+            .filters-content.people-tabs-layout .listing-more-menu {
+                min-width: 150px;
+                max-width: calc(100vw - 32px);
+            }
+            .filters-content.people-tabs-layout .listing-image img {
+                width: 64px;
+                height: 64px;
+            }
+            
+            /* Full-width filter elements – dense spacing */
+            .filter-group,
+            .country-switcher-group {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            
+            .filter-group input,
+            .filter-group select,
+            .country-switcher {
+                flex: 1;
+                min-width: 0;
+                max-width: 100%;
+                box-sizing: border-box;
+                min-height: 44px;
+                font-size: 16px;
+                padding: 8px 12px;
+            }
+            
+            .filter-buttons {
+                display: flex;
+                gap: 0.5rem;
+                width: 100%;
+                margin-top: 0;
+                padding-top: 4px;
+                border-top: 1px solid var(--border-light);
+            }
+            
+            .filter-buttons .btn-filter {
+                flex: 1;
+                min-height: 44px;
+                padding: 10px 16px;
+                font-size: 0.95rem;
+            }
+            
+            /* No collapsible state on mobile */
+            .filters-section-standalone.collapsed,
+            .filters-section-standalone.collapsed .filters-content {
+                max-height: none;
+                overflow: visible;
+            }
+        }
+        
+        /* Very small mobile screens */
+        @media (max-width: 480px) {
             .map-container {
-                height: 50vh;
-                min-height: 300px;
+                height: 50% !important;
+                min-height: 190px;
+            }
+            
+            .filters-section-standalone {
+                height: 50% !important;
+                min-height: 190px;
+            }
+            
+            .filters-header h3 {
+                font-size: 1.1rem;
+            }
+            
+            .mobile-listings-count {
+                font-size: 0.9rem;
+            }
+            
+            .filter-group label {
+                font-size: 0.95rem;
+                margin-bottom: 0.2rem;
+            }
+        }
+        
+        /* Landscape orientation on mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .map-container {
+                height: 50% !important;
+                min-height: 220px;
+            }
+            
+            .filters-section-standalone {
+                height: 50% !important;
+                min-height: 220px;
             }
         }
         
@@ -638,13 +1662,52 @@
             margin: 0 0 0.5rem 0;
             color: var(--primary-color);
         }
+        
+        /* Map popup: no background on wrapper so only the inner card shows (className is on .leaflet-popup, not the wrapper) */
+        .leaflet-popup.listing-popup-wrapper .leaflet-popup-content-wrapper {
+            padding: 0;
+            margin: 0;
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+        .leaflet-popup.listing-popup-wrapper .leaflet-popup-content {
+            margin: 0;
+            min-width: 0;
+            width: 100%;
+        }
+        .leaflet-popup-content .listing-card-popup {
+            min-width: 287px;
+            width: 287px;
+            height: 143px;
+            margin: 0;
+            box-sizing: border-box;
+            direction: rtl;
+        }
+        .leaflet-popup-content .listing-card-popup .listing-content {
+            text-align: right;
+        }
+        /* Popup tip (arrow) transparent so only the card is visible */
+        .leaflet-popup.listing-popup-wrapper .leaflet-popup-tip {
+            background: transparent !important;
+        }
+        /* Ensure popup container doesn't add background */
+        .leaflet-popup.listing-popup-wrapper {
+            background: transparent !important;
+        }
     </style>
 </head>
 <body>
     <!-- Header with Navigation -->
     <header>
         <nav>
-            <div class="logo" data-i18n="index.logo">📍 People Locations</div>
+            <div class="logo">
+                <span class="logo-base-text" data-i18n="index.logo">موقعیت‌های افراد :</span>
+                <span class="logo-role-container">
+                    <span class="logo-text logo-text-1"></span>
+                    <span class="logo-text logo-text-2"></span>
+                </span>
+            </div>
             <ul class="nav-links">
                 <!-- Navigation links will be populated by navigation.js -->
             </ul>
@@ -661,76 +1724,86 @@
     <!-- This will be replaced by router if SPA mode is active -->
     <div id="app-view-container" class="main-container">
         <!-- Filters Section (First) -->
-        <div class="filters-section-standalone">
-            <div class="filters-header">
-                <h3 data-i18n="index.filtersHeading">Filters</h3>
+        <div class="filters-section-standalone" id="filtersSection">
+            <div class="filters-header" id="filtersHeader">
+                <div class="filters-header-main">
+                    <h3 data-i18n="index.peopleWithoutAddressHeading">افراد بدون آدرس</h3>
+                    <span class="listings-count" id="noAddressCount">0 مورد</span>
+                    <span id="mobileListingsCount" class="mobile-listings-count">0 مورد</span>
+                </div>
+                <div class="filters-people-tabs" id="filtersPeopleTabs" role="tablist" aria-label="People list tabs">
+                    <button type="button" class="people-tab-btn active" id="peopleTabWithoutAddress" data-people-tab="without-address" role="tab" aria-selected="true">
+                        <span>بدون آدرس</span>
+                        <span class="people-tab-count" id="withoutAddressTabCount">0</span>
+                    </button>
+                    <button type="button" class="people-tab-btn" id="peopleTabWithAddress" data-people-tab="with-address" role="tab" aria-selected="false">
+                        <span>با آدرس</span>
+                        <span class="people-tab-count" id="withAddressTabCount">0</span>
+                    </button>
+                </div>
+                <button class="section-toggle" id="filtersToggle" aria-label="Toggle filters section">▼</button>
             </div>
-            <div class="filters-content">
-                <!-- Country/Language Switcher -->
+            <div class="filters-content people-tabs-layout" id="filtersPeopleContent">
+                <div class="people-tab-panel active" data-people-tab-panel="without-address">
+                    <div id="noAddressListContainer" class="no-address-list-wrapper"></div>
+                </div>
+                <div class="people-tab-panel" data-people-tab-panel="with-address">
+                    <div id="withAddressListContainer" class="with-address-list-wrapper"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Listings Section (Third) -->
+        <div class="listings-section-standalone" id="listingsSection">
+            <div class="listings-header" id="listingsHeader">
+                <div>
+                    <h2 data-i18n="index.listingsHeading">People Listings</h2>
+                    <span class="listings-count" id="listingsCount">0 مورد</span>
+                </div>
+                <button class="section-toggle" id="listingsToggle" aria-label="Toggle listings section">▼</button>
+            </div>
+            <div class="listings-container" id="listingsList">
+                <div class="loading-indicator" data-i18n="index.loadingListings">Loading listings...</div>
+            </div>
+        </div>
+        
+        <!-- Map Container (Fourth): filters bar at top, map below -->
+        <div class="map-container">
+            <div class="map-filters-bar" id="mapFiltersBar">
                 <div class="filter-group country-switcher-group">
                     <label for="countrySwitcher" data-i18n="index.countryLabel">Country</label>
-                    <select id="countrySwitcher" class="country-switcher">
-                        <option value="fa" data-i18n="index.countryIran">🇮🇷 Iran</option>
-                        <option value="en" data-i18n="index.countryUSA">🇺🇸 USA</option>
+                    <select id="countrySwitcher" class="country-switcher" title="کشور" aria-label="کشور">
+                        <option value="fa" data-i18n="index.countryIran">Iran</option>
+                        <option value="en" data-i18n="index.countryUSA">USA</option>
                     </select>
                 </div>
-                
-                <!-- Province Filter (Cascading from Country) -->
                 <div class="filter-group">
                     <label for="provinceFilter" data-i18n="index.provinceLabel">Province</label>
-                    <select id="provinceFilter" class="filter-select">
-                        <option value="" data-i18n="index.provinceAll">All Provinces</option>
-                        <!-- Provinces will be loaded dynamically based on country selection -->
+                    <select id="provinceFilter" class="filter-select" title="استان" aria-label="استان">
                     </select>
                 </div>
-                
-                <!-- Section/County Filter (Cascading from Province) -->
                 <div class="filter-group">
                     <label for="sectionFilter" data-i18n="index.sectionLabel">Section/County</label>
-                    <select id="sectionFilter" class="filter-select">
-                        <option value="" data-i18n="index.sectionAll">All Sections</option>
-                        <!-- Sections will be loaded dynamically based on province selection -->
+                    <select id="sectionFilter" class="filter-select" title="بخش/شهرستان" aria-label="بخش/شهرستان">
                     </select>
                 </div>
-                
-                <div class="filter-group">
-                    <label for="searchInput" data-i18n="index.searchLabel">Search</label>
-                    <input type="text" id="searchInput" data-i18n="index.searchPlaceholder" data-i18n-attr="placeholder" placeholder="Name, address, or phone...">
-                </div>
-                
-                <div class="filter-group">
-                    <label for="relationshipFilter" data-i18n="index.relationshipFilterLabel">Family Relationship</label>
-                    <select id="relationshipFilter">
-                        <option value="" data-i18n="index.relationshipAll">All Relationships</option>
-                        <option value="Spouse" data-i18n="index.relationshipSpouse">Spouse</option>
-                        <option value="Child" data-i18n="index.relationshipChild">Child</option>
-                        <option value="Parent" data-i18n="index.relationshipParent">Parent</option>
-                        <option value="Sibling" data-i18n="index.relationshipSibling">Sibling</option>
-                        <option value="Other" data-i18n="index.relationshipOther">Other</option>
-                    </select>
-                </div>
-                
                 <div class="filter-group">
                     <label for="roleFilter" data-i18n="index.roleFilterLabel">Role in Listing</label>
-                    <select id="roleFilter">
+                    <select id="roleFilter" title="نقش در فهرست" aria-label="نقش در فهرست">
                         <option value="" data-i18n="index.roleAll">All Roles</option>
+                        <option value="چپ کمونیست" data-i18n="index.roleCommunist">چپ کمونیست</option>
+                        <option value="اصلاح طلب" data-i18n="index.roleReformist">اصلاح طلب</option>
                         <option value="آخوند" data-i18n="index.roleAkhund">آخوند</option>
                         <option value="سپاهی" data-i18n="index.roleSepahi">سپاهی</option>
                         <option value="بسیجی" data-i18n="index.roleBasiji">بسیجی</option>
-                        <option value="افغانی" data-i18n="index.roleAfghani">افغانی</option>
-                        <option value="لبنانی" data-i18n="index.roleLebanese">لبنانی</option>
-                        <option value="هوادار اسرائیل" data-i18n="index.roleIsraelSupporter">هوادار اسرائیل</option>
-                        <option value="هوادار ترکیه" data-i18n="index.roleTurkeySupporter">هوادار ترکیه</option>
-                        <option value="هوادار جمهوری آذربایجان" data-i18n="index.roleAzerbaijanSupporter">هوادار جمهوری آذربایجان</option>
-                        <option value="افغان مال" data-i18n="index.roleAfghanMal">افغان مال</option>
+                        <option value="آقازاده" data-i18n="index.roleAghazadeh">آقازاده</option>
+                        <option value="دانشجوی سهمیه‌ای" data-i18n="index.roleQuotaStudent">دانشجوی سهمیه‌ای</option>
                         <option value="پان ترک" data-i18n="index.rolePanTurk">پان ترک</option>
                         <option value="پانکورد" data-i18n="index.rolePanKurd">پانکورد</option>
                         <option value="پان عرب" data-i18n="index.rolePanArab">پان عرب</option>
                         <option value="پان بلوچ" data-i18n="index.rolePanBaloch">پان بلوچ</option>
-                        <option value="دشمن زبان فارسی" data-i18n="index.rolePersianLanguageEnemy">دشمن زبان فارسی</option>
-                        <option value="آقازاده" data-i18n="index.roleAghazadeh">آقازاده</option>
-                        <option value="زمین‌خوار" data-i18n="index.roleLandGrabber">زمین‌خوار</option>
-                        <option value="دزد" data-i18n="index.roleThief">دزد</option>
+                        <option value="افغانی" data-i18n="index.roleAfghani">افغانی</option>
+                        <option value="افغان مال" data-i18n="index.roleAfghanMal">افغان مال</option>
                         <option value="اختلاسگر" data-i18n="index.roleEmbezzler">اختلاسگر</option>
                         <option value="قاچاقچی مواد" data-i18n="index.roleDrugSmuggler">قاچاقچی مواد</option>
                         <option value="قاچاقچی انسان" data-i18n="index.roleHumanTrafficker">قاچاقچی انسان</option>
@@ -738,34 +1811,24 @@
                         <option value="زورگیر" data-i18n="index.roleExtortionist">زورگیر</option>
                         <option value="متجاوز" data-i18n="index.roleRapist">متجاوز</option>
                         <option value="قاتل" data-i18n="index.roleMurderer">قاتل</option>
-                        <option value="مدیر فاسد" data-i18n="index.roleCorruptManager">مدیر فاسد</option>
-                        <option value="دانشجوی سهمیه‌ای" data-i18n="index.roleQuotaStudent">دانشجوی سهمیه‌ای</option>
-                        <option value="استاد سهمیه‌ای" data-i18n="index.roleQuotaProfessor">استاد سهمیه‌ای</option>
-                        <option value="هنرمند حکومتی" data-i18n="index.roleStateArtist">هنرمند حکومتی</option>
                     </select>
                 </div>
-                
-                <div class="filter-buttons">
-                    <button class="btn-filter" id="applyFiltersBtn" data-i18n="index.applyFiltersButton">Apply Filters</button>
-                    <button class="btn-filter btn-filter-secondary" id="clearFiltersBtn" data-i18n="index.clearFiltersButton">Clear</button>
+            </div>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <!-- Comments popup modal (single global instance; opened when user clicks comment button on a listing) -->
+    <div id="listing-comments-modal" class="listing-comments-modal-overlay" aria-hidden="true" aria-label="Comments">
+        <div class="listing-comments-modal-backdrop" data-action="close-comments-modal"></div>
+        <div class="listing-comments-modal-box">
+            <div class="listing-comments-panel listing-comments-panel-in-modal" data-id="">
+                <div class="comments-list"></div>
+                <div class="comment-form">
+                    <input type="text" class="comment-input" placeholder="نظر خود را بنویسید..." maxlength="500">
+                    <button type="button" class="comment-submit-btn">ارسال</button>
                 </div>
             </div>
-        </div>
-        
-        <!-- Listings Section (Third) -->
-        <div class="listings-section-standalone">
-            <div class="listings-header">
-                <h2 data-i18n="index.listingsHeading">People Listings</h2>
-                <span class="listings-count" id="listingsCount">0 <span data-i18n="index.listingsCount">listings</span></span>
-            </div>
-            <div class="listings-container" id="listingsList">
-                <div class="loading-indicator" data-i18n="index.loadingListings">Loading listings...</div>
-            </div>
-        </div>
-        
-        <!-- Map Container (Fourth) -->
-        <div class="map-container">
-            <div id="map"></div>
         </div>
     </div>
     
@@ -777,51 +1840,30 @@
                 <div class="filter-group country-switcher-group">
                     <label for="countrySwitcher" data-i18n="index.countryLabel">Country</label>
                     <select id="countrySwitcher" class="country-switcher">
-                        <option value="fa" data-i18n="index.countryIran">🇮🇷 Iran</option>
-                        <option value="en" data-i18n="index.countryUSA">🇺🇸 USA</option>
+                        <option value="fa" data-i18n="index.countryIran">Iran</option>
+                        <option value="en" data-i18n="index.countryUSA">USA</option>
                     </select>
                 </div>
                 
                 <h3 data-i18n="index.filtersHeading">Filters</h3>
                 
                 <div class="filter-group">
-                    <label for="searchInput" data-i18n="index.searchLabel">Search</label>
-                    <input type="text" id="searchInput" data-i18n="index.searchPlaceholder" data-i18n-attr="placeholder" placeholder="Name, address, or phone...">
-                </div>
-                
-                <div class="filter-group">
-                    <label for="relationshipFilter" data-i18n="index.relationshipFilterLabel">Family Relationship</label>
-                    <select id="relationshipFilter">
-                        <option value="" data-i18n="index.relationshipAll">All Relationships</option>
-                        <option value="Spouse" data-i18n="index.relationshipSpouse">Spouse</option>
-                        <option value="Child" data-i18n="index.relationshipChild">Child</option>
-                        <option value="Parent" data-i18n="index.relationshipParent">Parent</option>
-                        <option value="Sibling" data-i18n="index.relationshipSibling">Sibling</option>
-                        <option value="Other" data-i18n="index.relationshipOther">Other</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
                     <label for="roleFilter" data-i18n="index.roleFilterLabel">Role in Listing</label>
                     <select id="roleFilter">
                         <option value="" data-i18n="index.roleAll">All Roles</option>
+                        <option value="چپ کمونیست" data-i18n="index.roleCommunist">چپ کمونیست</option>
+                        <option value="اصلاح طلب" data-i18n="index.roleReformist">اصلاح طلب</option>
                         <option value="آخوند" data-i18n="index.roleAkhund">آخوند</option>
                         <option value="سپاهی" data-i18n="index.roleSepahi">سپاهی</option>
                         <option value="بسیجی" data-i18n="index.roleBasiji">بسیجی</option>
-                        <option value="افغانی" data-i18n="index.roleAfghani">افغانی</option>
-                        <option value="لبنانی" data-i18n="index.roleLebanese">لبنانی</option>
-                        <option value="هوادار اسرائیل" data-i18n="index.roleIsraelSupporter">هوادار اسرائیل</option>
-                        <option value="هوادار ترکیه" data-i18n="index.roleTurkeySupporter">هوادار ترکیه</option>
-                        <option value="هوادار جمهوری آذربایجان" data-i18n="index.roleAzerbaijanSupporter">هوادار جمهوری آذربایجان</option>
-                        <option value="افغان مال" data-i18n="index.roleAfghanMal">افغان مال</option>
+                        <option value="آقازاده" data-i18n="index.roleAghazadeh">آقازاده</option>
+                        <option value="دانشجوی سهمیه‌ای" data-i18n="index.roleQuotaStudent">دانشجوی سهمیه‌ای</option>
                         <option value="پان ترک" data-i18n="index.rolePanTurk">پان ترک</option>
                         <option value="پانکورد" data-i18n="index.rolePanKurd">پانکورد</option>
                         <option value="پان عرب" data-i18n="index.rolePanArab">پان عرب</option>
                         <option value="پان بلوچ" data-i18n="index.rolePanBaloch">پان بلوچ</option>
-                        <option value="دشمن زبان فارسی" data-i18n="index.rolePersianLanguageEnemy">دشمن زبان فارسی</option>
-                        <option value="آقازاده" data-i18n="index.roleAghazadeh">آقازاده</option>
-                        <option value="زمین‌خوار" data-i18n="index.roleLandGrabber">زمین‌خوار</option>
-                        <option value="دزد" data-i18n="index.roleThief">دزد</option>
+                        <option value="افغانی" data-i18n="index.roleAfghani">افغانی</option>
+                        <option value="افغان مال" data-i18n="index.roleAfghanMal">افغان مال</option>
                         <option value="اختلاسگر" data-i18n="index.roleEmbezzler">اختلاسگر</option>
                         <option value="قاچاقچی مواد" data-i18n="index.roleDrugSmuggler">قاچاقچی مواد</option>
                         <option value="قاچاقچی انسان" data-i18n="index.roleHumanTrafficker">قاچاقچی انسان</option>
@@ -829,20 +1871,28 @@
                         <option value="زورگیر" data-i18n="index.roleExtortionist">زورگیر</option>
                         <option value="متجاوز" data-i18n="index.roleRapist">متجاوز</option>
                         <option value="قاتل" data-i18n="index.roleMurderer">قاتل</option>
-                        <option value="مدیر فاسد" data-i18n="index.roleCorruptManager">مدیر فاسد</option>
-                        <option value="دانشجوی سهمیه‌ای" data-i18n="index.roleQuotaStudent">دانشجوی سهمیه‌ای</option>
-                        <option value="استاد سهمیه‌ای" data-i18n="index.roleQuotaProfessor">استاد سهمیه‌ای</option>
-                        <option value="هنرمند حکومتی" data-i18n="index.roleStateArtist">هنرمند حکومتی</option>
                     </select>
                 </div>
                 
-                <div class="filter-buttons">
-                    <button class="btn-filter" id="applyFiltersBtn" data-i18n="index.applyFiltersButton">Apply Filters</button>
-                    <button class="btn-filter btn-filter-secondary" id="clearFiltersBtn" data-i18n="index.clearFiltersButton">Clear</button>
-                </div>
+                
             </div>
             
             </div>
+        </div>
+    </div>
+
+    <!-- Image Carousel Modal (click on listing image opens this) -->
+    <div id="listingsImageCarouselModal" class="image-modal" role="dialog" aria-label="Image carousel" style="display: none;">
+        <div class="image-carousel-container">
+            <span class="image-modal-close" id="listingsCarouselClose" aria-label="Close">&times;</span>
+            <div class="image-carousel-content">
+                <button type="button" class="carousel-btn carousel-prev" id="listingsCarouselPrev" aria-label="Previous image">&#10094;</button>
+                <img id="listingsCarouselImage" src="" alt="" style="max-height: 80vh; object-fit: contain;">
+                <button type="button" class="carousel-btn carousel-next" id="listingsCarouselNext" aria-label="Next image">&#10095;</button>
+            </div>
+            <div class="carousel-indicators" id="listingsCarouselDots"></div>
+            <div class="carousel-counter" id="listingsCarouselCounter">1 / 1</div>
+            <div class="carousel-details" id="listingsCarouselDetails" style="display: none;"></div>
         </div>
     </div>
 
@@ -856,11 +1906,475 @@
     <script src="script.js"></script>
     
     <!-- Navigation Utility -->
+    <script src="analytics.js"></script>
     <script src="auth.js"></script>
     <script src="navigation.js"></script>
     
     <!-- Map and Listings JavaScript -->
-    <script src="map-listings.js"></script>
+    <script src="map-listings.js?v=20260217-11"></script>
+    
+    <!-- Rotating Logo with Random Roles -->
+    <script>
+        /**
+         * ============================================
+         * Rotating Logo with Random Roles (Morphing Text Effect)
+         * ============================================
+         * Updates the logo text to show "📍 مکان جغرافایی [random role]"
+         * Changes the role every 3 seconds with smooth morphing/liquid transition
+         */
+        (function() {
+            let roleRotationInterval = null;
+            let animationFrameId = null;
+            const BASE_TEXT = '📍 مکان جغرافایی';
+            const ROTATION_INTERVAL = 3000; // 3 seconds
+            const MORPH_TIME = 1.2; // Time for morphing animation (seconds)
+            const COOLDOWN_TIME = 0.3; // Cooldown between morphs (seconds)
+            
+            // Animation state: morphProgress 0→1 over MORPH_TIME (ease-in-out)
+            let textIndex = 0; // Currently displayed role (after morph complete)
+            let morphToIndex = 0; // Role we're morphing TO (set when morph starts)
+            let morphProgress = 0;
+            let cooldown = 0;
+            let lastTime = new Date();
+            let roles = [];
+            let text1Element = null;
+            let text2Element = null;
+            let logoContainer = null;
+            
+            /**
+             * Get all role names from the role filter dropdown
+             * Excludes the "All Roles" option (empty value)
+             */
+            function getRoleNames() {
+                const roleFilter = document.getElementById('roleFilter');
+                if (!roleFilter) {
+                    console.warn('Role filter not found, cannot extract roles');
+                    return [];
+                }
+                
+                const roleList = [];
+                for (let i = 0; i < roleFilter.options.length; i++) {
+                    const option = roleFilter.options[i];
+                    // Skip the "All Roles" option (empty value)
+                    if (option.value && option.value.trim() !== '') {
+                        roleList.push(option.value.trim());
+                    }
+                }
+                
+                console.log(`Extracted ${roleList.length} roles for logo rotation:`, roleList);
+                return roleList;
+            }
+            
+            /**
+             * Create morphing text structure in logo
+             */
+            function setupMorphingLogo() {
+                const logo = document.querySelector('.logo');
+                if (!logo) {
+                    console.warn('Logo element not found');
+                    return false;
+                }
+                
+                // Avoid re-initializing if already set up
+                if (logo.dataset.morphingReady === 'true') {
+                    return true;
+                }
+                
+                // Use existing markup if present (base text + role container)
+                let baseTextSpan = logo.querySelector('.logo-base-text');
+                let roleContainer = logo.querySelector('.logo-role-container');
+                if (!baseTextSpan || !roleContainer) {
+                    // Fallback: build structure from current text
+                    const initialBaseText = logo.textContent?.trim() || BASE_TEXT;
+                    logo.innerHTML = `
+                        <span class="logo-base-text">${initialBaseText} </span><span class="logo-role-container">
+                            <span class="logo-text logo-text-1"></span>
+                            <span class="logo-text logo-text-2"></span>
+                        </span>
+                    `;
+                    baseTextSpan = logo.querySelector('.logo-base-text');
+                    roleContainer = logo.querySelector('.logo-role-container');
+                }
+                
+                // Mark as initialized to prevent duplicate runs
+                logo.dataset.morphingReady = 'true';
+                
+                // Store references
+                logoContainer = logo;
+                text1Element = logo.querySelector('.logo-text-1');
+                text2Element = logo.querySelector('.logo-text-2');
+                
+                // Set initial role text (only the role part, not base text)
+                if (roles.length > 0) {
+                    const initialRole = roles[0];
+                    text1Element.textContent = initialRole;
+                    text2Element.textContent = roles[1 % roles.length];
+                    
+                    // Calculate fixed width for role container based on longest role
+                    const longestRole = roles.reduce((a, b) => a.length > b.length ? a : b);
+                    const tempSpan = document.createElement('span');
+                    tempSpan.style.visibility = 'hidden';
+                    tempSpan.style.position = 'absolute';
+                    tempSpan.style.fontSize = getComputedStyle(logo).fontSize;
+                    tempSpan.style.fontWeight = getComputedStyle(logo).fontWeight;
+                    tempSpan.style.fontFamily = getComputedStyle(logo).fontFamily;
+                    tempSpan.textContent = longestRole;
+                    document.body.appendChild(tempSpan);
+                    const roleWidth = tempSpan.offsetWidth + 25; // Add padding for blur effect
+                    document.body.removeChild(tempSpan);
+                    
+                    // Set fixed width for role container to prevent shifting
+                    roleContainer.style.minWidth = `${roleWidth}px`;
+                    roleContainer.style.width = `${roleWidth}px`;
+                    roleContainer.style.display = 'inline-block';
+                    roleContainer.style.textAlign = 'right'; // Right align for RTL
+                    roleContainer.style.marginLeft = '0.5em'; // Small space between base text and role
+                    roleContainer.style.marginRight = '0';
+                    roleContainer.style.paddingLeft = '0';
+                    roleContainer.style.paddingRight = '0';
+                    roleContainer.style.verticalAlign = 'baseline';
+                    roleContainer.style.direction = 'rtl'; // RTL for Persian
+                    
+                    // Calculate total logo width (base text + role container)
+                    // They should stick together with no gap
+                    const baseTextSpan = logo.querySelector('.logo-base-text');
+                    // Wait a moment for base text to render, then measure
+                    setTimeout(() => {
+                        const baseTextWidth = baseTextSpan.offsetWidth;
+                        // No gap - they stick together
+                        const totalWidth = baseTextWidth + roleWidth;
+                        logo.style.minWidth = `${totalWidth}px`;
+                        logo.style.width = `${totalWidth}px`;
+                    }, 10);
+                } else {
+                    text1Element.textContent = '';
+                    text2Element.textContent = '';
+                }
+                
+                return true;
+            }
+            
+            /**
+             * Ease-in-out: smooth start and end
+             */
+            function easeInOutCubic(t) {
+                return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            }
+            
+            /**
+             * Apply morphing styles based on fraction (0 to 1)
+             * Smooth crossfade with subtle blur for liquid effect
+             */
+            function setMorphStyles(fraction) {
+                if (!text1Element || !text2Element || !roles || roles.length === 0) return;
+                
+                const eased = easeInOutCubic(fraction);
+                
+                // Text2 (incoming): fade in, blur out
+                const blur2 = (1 - eased) * 4; // 4px max blur at start
+                const opacity2 = eased * 100;
+                text2Element.style.filter = `blur(${blur2}px)`;
+                text2Element.style.opacity = `${opacity2}%`;
+                
+                // Text1 (outgoing): fade out, blur in
+                const opacity1 = (1 - eased) * 100;
+                const blur1 = eased * 4;
+                text1Element.style.filter = `blur(${blur1}px)`;
+                text1Element.style.opacity = `${opacity1}%`;
+                
+                text1Element.textContent = roles[textIndex % roles.length];
+                text2Element.textContent = roles[morphToIndex % roles.length];
+            }
+            
+            /**
+             * Morphing animation step - progress 0→1 over MORPH_TIME
+             */
+            function doMorph(dt) {
+                morphProgress = Math.min(1, morphProgress + dt / MORPH_TIME);
+                const fraction = morphProgress;
+                
+                setMorphStyles(fraction);
+                
+                if (fraction >= 1) {
+                    morphProgress = 0;
+                    cooldown = COOLDOWN_TIME;
+                    textIndex = morphToIndex;
+                    const temp = text1Element;
+                    text1Element = text2Element;
+                    text2Element = temp;
+                    text1Element.className = 'logo-text logo-text-1';
+                    text2Element.className = 'logo-text logo-text-2';
+                }
+            }
+            
+            /**
+             * Cooldown phase - reset styles between morphs
+             */
+            function doCooldown() {
+                morphProgress = 0;
+                if (text1Element && text2Element) {
+                    text1Element.style.filter = 'none';
+                    text1Element.style.opacity = '100%';
+                    text2Element.style.filter = 'none';
+                    text2Element.style.opacity = '0%';
+                }
+            }
+            
+            /**
+             * Animation loop using requestAnimationFrame
+             */
+            function animate() {
+                animationFrameId = requestAnimationFrame(animate);
+                const newTime = new Date();
+                const dt = Math.min((newTime.getTime() - lastTime.getTime()) / 1000, 0.1);
+                lastTime = newTime;
+                
+                if (cooldown > 0) {
+                    cooldown -= dt;
+                    if (cooldown <= 0) doCooldown();
+                } else {
+                    doMorph(dt);
+                }
+            }
+            
+            /**
+             * Trigger new morph (change to next role)
+             */
+            function triggerMorph() {
+                if (roles.length === 0) return;
+                
+                let nextIndex;
+                do {
+                    nextIndex = Math.floor(Math.random() * roles.length);
+                } while (nextIndex === textIndex && roles.length > 1);
+                
+                morphToIndex = nextIndex;
+                morphProgress = 0;
+                cooldown = 0;
+            }
+            
+            /**
+             * Update logo text with random role (legacy function - now uses morphing)
+             */
+            function updateLogoWithRandomRole() {
+                if (roles.length === 0) {
+                    roles = getRoleNames();
+                    if (roles.length === 0) {
+                        return;
+                    }
+                }
+                triggerMorph();
+            }
+            
+            /**
+             * Initialize rotating logo with morphing effect
+             * Waits for DOM to be ready and role filter to be loaded
+             */
+            function initRotatingLogo() {
+                // Wait a bit for role filter to be populated
+                setTimeout(() => {
+                    roles = getRoleNames();
+                    if (roles.length === 0) {
+                        console.warn('No roles found, retrying in 1 second...');
+                        setTimeout(initRotatingLogo, 1000);
+                        return;
+                    }
+                    
+                    // Setup morphing logo structure
+                    if (!setupMorphingLogo()) {
+                        console.warn('Failed to setup morphing logo');
+                        return;
+                    }
+                    
+                    // Start animation loop
+                    if (animationFrameId) {
+                        cancelAnimationFrame(animationFrameId);
+                    }
+                    lastTime = new Date();
+                    animate();
+                    
+                    // Trigger first morph immediately
+                    triggerMorph();
+                    
+                    // Then trigger morph every 3 seconds
+                    if (roleRotationInterval) {
+                        clearInterval(roleRotationInterval);
+                    }
+                    roleRotationInterval = setInterval(updateLogoWithRandomRole, ROTATION_INTERVAL);
+                    
+                    console.log('✅ Rotating logo with morphing effect initialized - changing role every 3 seconds');
+                }, 500);
+            }
+            
+            /**
+             * Cleanup function to stop animation
+             */
+            function cleanupRotatingLogo() {
+                if (roleRotationInterval) {
+                    clearInterval(roleRotationInterval);
+                    roleRotationInterval = null;
+                }
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+            }
+            
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initRotatingLogo);
+            } else {
+                // DOM already loaded
+                initRotatingLogo();
+            }
+            
+            // Re-initialize if page is navigated to (for SPA mode)
+            if (typeof window !== 'undefined') {
+                window.initRotatingLogo = initRotatingLogo;
+                window.cleanupRotatingLogo = cleanupRotatingLogo;
+            }
+            
+            // Also re-initialize when home view is loaded (for SPA router)
+            // Listen for custom event or check periodically if role filter becomes available
+            const checkRoleFilterInterval = setInterval(() => {
+                const roleFilter = document.getElementById('roleFilter');
+                if (roleFilter && roleFilter.options.length > 1) {
+                    // Role filter is loaded, initialize if not already running
+                    if (!roleRotationInterval) {
+                        initRotatingLogo();
+                    }
+                    clearInterval(checkRoleFilterInterval);
+                }
+            }, 500);
+            
+            // Stop checking after 10 seconds to avoid infinite checking
+            setTimeout(() => {
+                clearInterval(checkRoleFilterInterval);
+            }, 10000);
+        })();
+    </script>
+    
+    <!-- Guest Notification Script -->
+    <script>
+        /**
+         * Show Guest notification banner if user is Guest
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for auth API to be available
+            function checkGuestStatus() {
+                if (typeof authAPI !== 'undefined' && authAPI.getCurrentUser()) {
+                    const user = authAPI.getCurrentUser();
+                    if (user && user.role === 'Guest') {
+                        const banner = document.getElementById('guestNotificationBanner');
+                        if (banner) {
+                            banner.classList.add('show');
+                        }
+                    }
+                } else {
+                    // Check again after a short delay
+                    setTimeout(checkGuestStatus, 500);
+                }
+            }
+            checkGuestStatus();
+        });
+    </script>
+    
+    <!-- Mobile Collapsible Sections Script -->
+    <script>
+        /**
+         * ============================================
+         * Mobile Collapsible Sections
+         * ============================================
+         * Handles collapsing/expanding of filters and listings sections on mobile
+         * Improves mobile UX by allowing users to focus on map or specific sections
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Only enable on mobile devices (screen width <= 768px)
+            function isMobile() {
+                return window.innerWidth <= 768;
+            }
+            
+            // Get section elements
+            const filtersSection = document.getElementById('filtersSection');
+            const filtersHeader = document.getElementById('filtersHeader');
+            const filtersToggle = document.getElementById('filtersToggle');
+            const listingsSection = document.getElementById('listingsSection');
+            const listingsHeader = document.getElementById('listingsHeader');
+            const listingsToggle = document.getElementById('listingsToggle');
+            
+            /**
+             * Toggle filters section (tablet only; mobile uses 50/50 map+filters, no collapse)
+             */
+            function toggleFilters() {
+                if (!isMobile()) return;
+                /* Mobile layout hides listings and uses 50% map / 50% filters; no collapse */
+                if (window.innerWidth <= 768) return;
+                
+                filtersSection.classList.toggle('collapsed');
+                if (filtersToggle) {
+                    filtersToggle.classList.toggle('active');
+                    const isCollapsed = filtersSection.classList.contains('collapsed');
+                    filtersToggle.textContent = isCollapsed ? '▲' : '▼';
+                }
+                console.log('Filters section toggled:', filtersSection.classList.contains('collapsed') ? 'collapsed' : 'expanded');
+            }
+            
+            /**
+             * Toggle listings section (tablet only; mobile hides listings entirely)
+             */
+            function toggleListings() {
+                if (!isMobile()) return;
+                if (window.innerWidth <= 768) return; /* Listings hidden on mobile */
+                
+                if (listingsSection) listingsSection.classList.toggle('collapsed');
+                if (listingsToggle) {
+                    listingsToggle.classList.toggle('active');
+                    const isCollapsed = listingsSection && listingsSection.classList.contains('collapsed');
+                    listingsToggle.textContent = isCollapsed ? '▲' : '▼';
+                }
+                console.log('Listings section toggled:', listingsSection && listingsSection.classList.contains('collapsed') ? 'collapsed' : 'expanded');
+            }
+            
+            /* Add listeners only when toggle is shown (tablet, not mobile) */
+            if (filtersHeader && filtersToggle) {
+                filtersHeader.addEventListener('click', toggleFilters);
+                filtersToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleFilters();
+                });
+            }
+            if (listingsHeader && listingsToggle) {
+                listingsHeader.addEventListener('click', toggleListings);
+                listingsToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleListings();
+                });
+            }
+            
+            // Handle window resize - remove collapsed state if screen becomes larger
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    if (!isMobile()) {
+                        // Remove collapsed state on larger screens
+                        if (filtersSection) filtersSection.classList.remove('collapsed');
+                        if (listingsSection) listingsSection.classList.remove('collapsed');
+                        if (filtersToggle) {
+                            filtersToggle.classList.remove('active');
+                            filtersToggle.textContent = '▼';
+                        }
+                        if (listingsToggle) {
+                            listingsToggle.classList.remove('active');
+                            listingsToggle.textContent = '▼';
+                        }
+                    }
+                }, 250);
+            });
+            
+            console.log('Mobile collapsible sections initialized');
+        });
+    </script>
     
     <!-- Country Switcher Script -->
     <script>
@@ -919,9 +2433,9 @@
                             console.log('Setting programmatic movement flag BEFORE map movement');
                             window.mapListingsContext.isProgrammaticMovement = true;
                             console.log('Programmatic movement flag set to true, current value:', window.mapListingsContext.isProgrammaticMovement);
-                        } else {
+                } else {
                             console.warn('window.mapListingsContext is not available! Cannot prevent reloads during programmatic movement.');
-                        }
+                }
                         
                         // Animate map to country location
                         map.setView(coordinates.center, coordinates.zoom, {
@@ -936,9 +2450,9 @@
                             if (typeof window.mapListingsContext !== 'undefined') {
                                 window.mapListingsContext.isProgrammaticMovement = false;
                                 console.log('Programmatic movement flag cleared');
-                            }
+            }
                         }, 2000); // 1s animation + 800ms debounce + 200ms buffer
-                    } else {
+        } else {
                         console.warn('No coordinates found for country:', countryCode);
                     }
                 }
@@ -946,6 +2460,11 @@
                 // Center map on initial country when page loads
                 // Wait for map to be initialized
                 setTimeout(() => {
+                    const hasSharedPerson = new URLSearchParams(window.location.search).has('person');
+                    if (hasSharedPerson) {
+                        console.log('Shared person deep-link detected: skipping initial country recenter');
+                        return;
+                    }
                     const initialCountry = languageManager.getCurrentLanguage();
                     centerMapOnCountry(initialCountry);
                 }, 1000); // Wait 1 second for map initialization
@@ -971,6 +2490,6 @@
             }
         });
     </script>
+    <script src="pwa.js"></script>
 </body>
 </html>
-

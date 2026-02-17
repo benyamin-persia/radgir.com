@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="dashboard.title">Dashboard - Hierarchical Auth System</title>
+    <meta name="theme-color" content="#243C4C">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Radgir">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <title data-i18n="dashboard.title">Dashboard - Radgir</title>
     <link rel="stylesheet" href="styles.css">
     <script>
         // Apply theme immediately to prevent flash of unstyled content
@@ -208,6 +216,257 @@
 
         .posts-list {
             margin-top: 20px;
+        }
+
+        /* Inbox / Messaging Section */
+        .messages-section {
+            background: var(--background-color);
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .messages-section h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .messages-subtitle {
+            margin-top: 8px;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .messages-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .messages-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        .messages-settings-status {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        .messages-new-conversation {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .messages-new-conversation input {
+            flex: 1;
+            min-width: 220px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--background-alt);
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        .message-user-search-results {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message-user-result {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--background-alt);
+        }
+
+        .message-user-result-name {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .message-user-result-meta {
+            color: var(--text-light);
+            font-size: 0.82rem;
+        }
+
+        .messages-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 15px;
+        }
+
+        .messages-conversations-panel,
+        .messages-thread-panel {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--background-alt);
+        }
+
+        .messages-conversations-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .messages-refresh-btn {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+        }
+
+        .messages-conversations-list {
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .messages-conversation-item {
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .messages-conversation-item:hover {
+            background: rgba(0, 172, 172, 0.08);
+        }
+
+        .messages-conversation-item.active {
+            background: rgba(0, 172, 172, 0.14);
+        }
+
+        .messages-conversation-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .messages-conversation-name {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .messages-conversation-preview {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-top: 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .messages-unread-badge {
+            min-width: 20px;
+            height: 20px;
+            border-radius: 999px;
+            background: #dc3545;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+        }
+
+        .messages-empty {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .messages-thread-header {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .messages-thread-list {
+            min-height: 240px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .messages-bubble {
+            max-width: 78%;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .messages-bubble.own {
+            align-self: flex-end;
+            background: rgba(0, 172, 172, 0.16);
+            border-color: rgba(0, 172, 172, 0.28);
+        }
+
+        .messages-bubble.other {
+            align-self: flex-start;
+            background: var(--background-color);
+            border-color: var(--border-color);
+        }
+
+        .messages-bubble-header {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .messages-bubble-content {
+            color: var(--text-color);
+            font-size: 0.92rem;
+        }
+
+        .messages-composer {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            border-top: 1px solid var(--border-color);
+            padding: 12px;
+        }
+
+        .messages-composer textarea {
+            flex: 1;
+            resize: vertical;
+            min-height: 42px;
+            max-height: 150px;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--background-color);
+            color: var(--text-color);
+            font-size: 0.9rem;
+            font-family: inherit;
         }
 
         .post-card {
@@ -459,6 +718,129 @@
             color: white;
             border-color: var(--primary-light);
         }
+        
+        /* ============================================
+           Mobile Responsive Styles for Dashboard
+           ============================================ */
+        @media (max-width: 768px) {
+            .dashboard-header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .dashboard-header-left {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .dashboard-nav-links {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+                align-items: stretch;
+            }
+            
+            .dashboard-nav-links a,
+            .dashboard-nav-links button {
+                width: 100%;
+                text-align: center;
+                padding: 12px 16px;
+                min-height: 44px;
+                font-size: 1rem;
+            }
+            
+            .dashboard-container {
+                padding: 0 15px;
+                margin: 20px auto;
+            }
+            
+            .profile-card,
+            .posts-section,
+            .messages-section {
+                padding: 20px;
+            }
+            
+            .profile-info {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .posts-header-actions {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+            
+            .posts-search {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .messages-new-conversation {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .messages-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .messages-thread-list,
+            .messages-conversations-list {
+                max-height: 320px;
+            }
+            
+            .post-card-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .post-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .post-card-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+            
+            .post-card-actions .btn-edit,
+            .post-card-actions .btn-delete {
+                flex: 1;
+                min-height: 44px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .dashboard-header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .profile-card,
+            .posts-section,
+            .messages-section {
+                padding: 15px;
+            }
+            
+            .posts-section h2 {
+                font-size: 1.3rem;
+            }
+
+            .messages-bubble {
+                max-width: 90%;
+            }
+            
+            .post-card-title {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -492,6 +874,39 @@
                     <!-- Will be populated by JavaScript -->
                 </div>
                 
+                <!-- Role Upgrade Request Section (for Guest users) -->
+                <!-- This section is prominently displayed for Guest users to request elevation -->
+                <div id="roleUpgradeSection" style="margin-top: 20px; padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); visibility: visible; opacity: 1;">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                        <div style="font-size: 2.5rem;">🔒</div>
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0; color: white; font-size: 1.3rem;">Request Account Elevation</h3>
+                            <p style="margin: 5px 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 0.95rem;">
+                                As a Guest user, you have read-only access. Request elevation to User role to create and manage posts (5 posts per day).
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div id="upgradeRequestStatus" style="margin-bottom: 15px;"></div>
+                    
+                    <form id="roleUpgradeForm" style="display: none;">
+                        <input type="hidden" id="requestedRole" value="User">
+                        <div style="margin-bottom: 15px; padding: 15px; background: rgba(255, 255, 255, 0.15); border-radius: 5px; backdrop-filter: blur(10px);">
+                            <div style="color: white; font-weight: 600; margin-bottom: 5px;">Requesting: Guest → User</div>
+                            <div style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem;">
+                                As a User, you can create and manage your own posts with a limit of 5 posts per day.
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label for="upgradeMessage" style="display: block; margin-bottom: 8px; color: white; font-weight: 500;">Message (Optional):</label>
+                            <textarea id="upgradeMessage" rows="3" style="width: 100%; padding: 10px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 5px; background: rgba(255, 255, 255, 0.95); color: var(--text-color); font-size: 0.95rem; box-sizing: border-box;" placeholder="Explain why you need this role upgrade (optional)..."></textarea>
+                        </div>
+                        <button type="submit" class="btn-edit" style="width: 100%; padding: 12px; font-size: 1rem; font-weight: 600; background: white; color: #667eea; border: none; border-radius: 5px; cursor: pointer; transition: all 0.3s ease;">
+                            📤 Request Elevation to User Role
+                        </button>
+                    </form>
+                </div>
+                
                 <!-- Data Privacy Section -->
                 <div style="margin-top: 20px; padding: 20px; background: var(--background-alt); border-radius: 5px; border-top: 2px solid var(--primary-color);">
                     <h3 style="margin-top: 0; color: var(--primary-color);" data-i18n="dashboard.dataPrivacy">Data Privacy</h3>
@@ -500,6 +915,48 @@
                         <button onclick="viewActivityLogs()" class="btn-edit" style="width: 100%;" data-i18n="dashboard.viewActivity">View Activity Logs</button>
                         <button onclick="deleteAccount()" class="btn-delete" style="width: 100%;" data-i18n="dashboard.deleteAccount">Delete My Account</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inbox / Messaging Section -->
+        <div class="messages-section" id="messagesSection">
+            <h2 data-i18n="dashboard.inboxHeading">Inbox</h2>
+            <p class="messages-subtitle" data-i18n="dashboard.inboxSubtitle">Send and receive direct messages from other users.</p>
+
+            <div class="messages-toolbar">
+                <label class="messages-toggle">
+                    <input type="checkbox" id="allowDirectMessagesToggle">
+                    <span data-i18n="dashboard.allowDirectMessages">Allow direct messages from other users</span>
+                </label>
+                <span class="messages-settings-status" id="messagesSettingsStatus"></span>
+            </div>
+
+            <div class="messages-new-conversation">
+                <input type="text" id="messageUserSearchInput" placeholder="Search users by username or email..." data-i18n-placeholder="dashboard.searchUsersPlaceholder">
+                <button type="button" id="messageUserSearchBtn" class="btn-edit" data-i18n="dashboard.searchUsersButton">Search</button>
+            </div>
+            <div id="messageUserSearchResults" class="message-user-search-results"></div>
+
+            <div class="messages-layout">
+                <div class="messages-conversations-panel">
+                    <div class="messages-conversations-header">
+                        <span data-i18n="dashboard.conversations">Conversations</span>
+                        <button type="button" id="refreshConversationsBtn" class="btn-edit messages-refresh-btn" data-i18n="dashboard.refreshConversations">Refresh</button>
+                    </div>
+                    <div id="messagesConversationsList" class="messages-conversations-list">
+                        <div class="messages-empty" data-i18n="dashboard.loadingConversations">Loading conversations...</div>
+                    </div>
+                </div>
+                <div class="messages-thread-panel">
+                    <div id="messagesThreadHeader" class="messages-thread-header" data-i18n="dashboard.selectConversationPrompt">Select a conversation to start messaging.</div>
+                    <div id="messagesThreadList" class="messages-thread-list">
+                        <div class="messages-empty" data-i18n="dashboard.selectConversationPrompt">Select a conversation to start messaging.</div>
+                    </div>
+                    <form id="messagesComposerForm" class="messages-composer" style="display: none;">
+                        <textarea id="messagesComposerInput" rows="2" maxlength="4000" placeholder="Type your message..." data-i18n-placeholder="dashboard.messageComposerPlaceholder"></textarea>
+                        <button type="submit" id="messagesSendBtn" class="btn-edit" data-i18n="dashboard.sendMessage">Send</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -523,6 +980,18 @@
                 <!-- Pagination will be loaded here -->
             </div>
         </div>
+
+        <div class="posts-section" id="bookmarksSection">
+            <h2>
+                <span data-i18n="dashboard.bookmarkedCards">Bookmarked Cards</span>
+            </h2>
+            <div id="bookmarksLoading" class="loading-posts" style="display: none;" data-i18n="dashboard.loadingBookmarkedCards">
+                Loading bookmarked cards...
+            </div>
+            <div id="bookmarksList" class="posts-list">
+                <!-- Bookmarked cards will be loaded here -->
+            </div>
+        </div>
     </div>
 
     <!-- Image Modal -->
@@ -534,9 +1003,11 @@
     </div>
 
     <!-- Authentication and Navigation Scripts -->
+    <script src="analytics.js"></script>
     <script src="auth.js"></script>
     <script src="navigation.js"></script>
     <script src="dashboard.js"></script>
+    <script src="messages-dashboard.js"></script>
     <script>
         /**
          * ============================================
@@ -575,6 +1046,12 @@
 
                 if (response.success) {
                     const user = response.data.user;
+                    
+                    // CRITICAL: Always update localStorage with fresh user data from server
+                    // This ensures we have the latest role information
+                    localStorage.setItem('user', JSON.stringify(user));
+                    console.log('User profile loaded and cached. Current role:', user.role);
+                    
                     displayProfile(user);
                 }
             } catch (error) {
@@ -618,6 +1095,11 @@
          * @param {Object} user - User object
          */
         function displayProfile(user) {
+            // Update the cached user in authAPI to ensure consistency
+            if (user) {
+                localStorage.setItem('user', JSON.stringify(user));
+            }
+            
             const profileInfo = document.getElementById('profileInfo');
             
             // Get badge class for role
@@ -690,6 +1172,356 @@
             
             // Show email verification status
             displayEmailVerificationStatus(user);
+            
+            // Show role upgrade section for Guest users (MUST be called after profile is displayed)
+            // This function will refresh user data from server to get latest role
+            console.log('Calling displayRoleUpgradeSection for user:', user);
+            displayRoleUpgradeSection(user);
+        }
+        
+        /**
+         * Refresh user data from server
+         * This ensures we have the latest user information including role changes
+         */
+        async function refreshUserData() {
+            try {
+                console.log('Refreshing user data from server...');
+                const response = await authAPI.request('/auth/me');
+                
+                if (response.success && response.data && response.data.user) {
+                    const updatedUser = response.data.user;
+                    console.log('User data refreshed:', updatedUser);
+                    
+                    // Update localStorage with fresh user data
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                    
+                    // Return updated user
+                    return updatedUser;
+                }
+            } catch (error) {
+                console.error('Error refreshing user data:', error);
+            }
+            return null;
+        }
+        
+        /**
+         * Display role upgrade section for Guest users
+         * This function checks the user's current role and shows/hides the section accordingly
+         * It always refreshes user data from server to ensure we have the latest role
+         */
+        async function displayRoleUpgradeSection(user) {
+            console.log('displayRoleUpgradeSection called with user:', user);
+            
+            // ALWAYS refresh user data from server to get latest role
+            // This is critical because the role may have been changed by an admin
+            const refreshedUser = await refreshUserData();
+            const currentUser = refreshedUser || user;
+            
+            console.log('User role from cache:', user ? user.role : 'undefined');
+            console.log('User role after server refresh:', currentUser ? currentUser.role : 'undefined');
+            
+            const upgradeSection = document.getElementById('roleUpgradeSection');
+            if (!upgradeSection) {
+                console.error('❌ Role upgrade section not found in DOM! Element ID: roleUpgradeSection');
+                return;
+            }
+            
+            console.log('✅ Role upgrade section found in DOM');
+            
+            // Only show for Guest users - ALWAYS check the refreshed role from server
+            if (currentUser && currentUser.role === 'Guest') {
+                console.log('✅ User is Guest - displaying role upgrade section');
+                upgradeSection.style.display = 'block';
+                upgradeSection.style.visibility = 'visible';
+                upgradeSection.style.opacity = '1';
+                loadUpgradeRequestStatus();
+            } else {
+                // User is NOT Guest - hide the section completely
+                console.log('❌ User is not Guest - hiding role upgrade section. Current role:', currentUser ? currentUser.role : 'undefined');
+                upgradeSection.style.display = 'none';
+                upgradeSection.style.visibility = 'hidden';
+                upgradeSection.style.opacity = '0';
+                
+                // Clear any status messages in the upgrade section
+                const statusDiv = document.getElementById('upgradeRequestStatus');
+                if (statusDiv) {
+                    statusDiv.innerHTML = '';
+                    statusDiv.style.display = 'none';
+                }
+                
+                // Hide the form as well
+                const form = document.getElementById('roleUpgradeForm');
+                if (form) {
+                    form.style.display = 'none';
+                }
+                
+                // If user was upgraded (role changed from Guest to something else), show success message
+                const cachedRole = user ? user.role : null;
+                if (cachedRole === 'Guest' && currentUser && currentUser.role !== 'Guest') {
+                    console.log('✅ User role was upgraded! Showing success message');
+                    // Show success message in profile section (not in hidden upgrade section)
+                    const profileContent = document.getElementById('profileContent');
+                    if (profileContent && !document.getElementById('roleUpgradeSuccess')) {
+                        const successMsg = document.createElement('div');
+                        successMsg.id = 'roleUpgradeSuccess';
+                        successMsg.style.cssText = 'padding: 15px; background: rgba(40, 167, 69, 0.2); border-left: 4px solid #28a745; border-radius: 5px; color: #155724; margin-top: 15px; margin-bottom: 15px;';
+                        successMsg.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 1.5rem;">✅</span>
+                                <div>
+                                    <strong style="font-size: 1.1rem;">Account Elevated Successfully!</strong>
+                                    <br>Your account has been upgraded from Guest to <strong>${currentUser.role}</strong>. You can now create and manage posts!
+                                    <br><small>Refreshing page in 3 seconds to show all changes...</small>
+                                </div>
+                            </div>
+                        `;
+                        // Insert after profile info
+                        const profileInfo = document.getElementById('profileInfo');
+                        if (profileInfo && profileInfo.parentNode) {
+                            profileInfo.parentNode.insertBefore(successMsg, profileInfo.nextSibling);
+                        }
+                        
+                        // Auto-refresh the page after 3 seconds to show updated UI
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 3000);
+                    }
+                }
+            }
+        }
+        
+        // Also call on page load in case user profile loads before this script
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit for auth to initialize
+            setTimeout(async function() {
+                if (typeof authAPI !== 'undefined' && authAPI.getCurrentUser()) {
+                    const user = authAPI.getCurrentUser();
+                    if (user) {
+                        console.log('DOMContentLoaded: Checking user role, calling displayRoleUpgradeSection');
+                        await displayRoleUpgradeSection(user);
+                    }
+                }
+            }, 1000);
+        });
+        
+        // Set up periodic role check (every 15 seconds) to detect role changes
+        // This ensures if an admin approves a request, the UI updates automatically
+        // Only check if user is currently Guest (to avoid unnecessary API calls)
+        let roleCheckInterval = null;
+        function startRoleCheckInterval() {
+            if (roleCheckInterval) {
+                clearInterval(roleCheckInterval);
+            }
+            
+            if (typeof authAPI !== 'undefined' && authAPI.isAuthenticated()) {
+                const cachedUser = authAPI.getCurrentUser();
+                if (cachedUser && cachedUser.role === 'Guest') {
+                    console.log('Starting periodic role check (every 15 seconds)...');
+                    roleCheckInterval = setInterval(async function() {
+                        if (typeof authAPI !== 'undefined' && authAPI.isAuthenticated()) {
+                            const currentCachedUser = authAPI.getCurrentUser();
+                            // Only check if still Guest (if role changed, we'll detect it)
+                            if (currentCachedUser && currentCachedUser.role === 'Guest') {
+                                console.log('Periodic check: Refreshing user data to check for role changes...');
+                                const refreshedUser = await refreshUserData();
+                                if (refreshedUser && refreshedUser.role !== 'Guest') {
+                                    console.log('✅ Role change detected! User is now:', refreshedUser.role);
+                                    // Clear interval since user is no longer Guest
+                                    if (roleCheckInterval) {
+                                        clearInterval(roleCheckInterval);
+                                        roleCheckInterval = null;
+                                    }
+                                    // Reload the profile to update the UI
+                                    await loadProfile();
+                                }
+                            } else {
+                                // User is no longer Guest, stop checking
+                                if (roleCheckInterval) {
+                                    clearInterval(roleCheckInterval);
+                                    roleCheckInterval = null;
+                                    console.log('Stopped periodic role check - user is no longer Guest');
+                                }
+                            }
+                        }
+                    }, 15000); // Check every 15 seconds
+                    
+                    // Stop checking after 10 minutes (request should be processed by then)
+                    setTimeout(() => {
+                        if (roleCheckInterval) {
+                            clearInterval(roleCheckInterval);
+                            roleCheckInterval = null;
+                            console.log('Stopped periodic role check (10 minutes elapsed)');
+                        }
+                    }, 600000); // 10 minutes
+                }
+            }
+        }
+        
+        // Start periodic check when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(startRoleCheckInterval, 2000);
+        });
+        
+        /**
+         * Load upgrade request status
+         */
+        async function loadUpgradeRequestStatus() {
+            try {
+                console.log('Loading upgrade request status...');
+                const token = authAPI.getToken();
+                if (!token) {
+                    console.error('No authentication token found');
+                    return;
+                }
+                
+                const response = await fetch(`${window.location.origin}/api/role-upgrade/my-requests`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const result = await response.json();
+                console.log('Upgrade request status response:', result);
+                
+                const statusDiv = document.getElementById('upgradeRequestStatus');
+                const form = document.getElementById('roleUpgradeForm');
+                
+                if (!statusDiv || !form) {
+                    console.error('Status div or form not found');
+                    return;
+                }
+                
+                if (result.success && result.data && result.data.requests) {
+                    const pendingRequest = result.data.requests.find(r => r.status === 'pending');
+                    
+                    if (pendingRequest) {
+                        // Show pending request status
+                        statusDiv.innerHTML = `
+                            <div style="padding: 15px; background: rgba(255, 243, 205, 0.95); border-left: 4px solid #ffc107; border-radius: 5px; color: #856404; margin-bottom: 15px;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span style="font-size: 1.5rem;">⏳</span>
+                                    <strong style="font-size: 1.1rem;">Pending Request</strong>
+                                </div>
+                                <div style="margin-left: 2rem;">
+                                    You have requested to upgrade from <strong>${pendingRequest.currentRole}</strong> to <strong>${pendingRequest.requestedRole}</strong>.
+                                    <br><small>Submitted: ${new Date(pendingRequest.createdAt).toLocaleString()}</small>
+                                    ${pendingRequest.message ? `<br><br><strong>Your Message:</strong><br>${pendingRequest.message}` : ''}
+                                    <br><br><small style="color: #856404;">An Almighty or SuperAdmin will review your request soon.</small>
+                                </div>
+                            </div>
+                        `;
+                        form.style.display = 'none';
+                    } else {
+                        // No pending request, show form
+                        statusDiv.innerHTML = '';
+                        form.style.display = 'block';
+                        console.log('No pending request found, showing form');
+                    }
+                } else {
+                    // No requests at all, show form
+                    statusDiv.innerHTML = '';
+                    form.style.display = 'block';
+                    console.log('No requests found, showing form');
+                }
+            } catch (error) {
+                console.error('Error loading upgrade request status:', error);
+                // On error, still show the form
+                const form = document.getElementById('roleUpgradeForm');
+                if (form) {
+                    form.style.display = 'block';
+                }
+            }
+        }
+        
+        /**
+         * Submit role upgrade request
+         */
+        const roleUpgradeForm = document.getElementById('roleUpgradeForm');
+        if (roleUpgradeForm) {
+            roleUpgradeForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                console.log('Role upgrade form submitted');
+                
+                const requestedRole = document.getElementById('requestedRole').value;
+                const message = document.getElementById('upgradeMessage').value.trim();
+                
+                // Disable submit button
+                const submitBtn = roleUpgradeForm.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Submitting Request...';
+                }
+                
+                try {
+                    const token = authAPI.getToken();
+                    if (!token) {
+                        alert('You must be logged in to submit a request');
+                        return;
+                    }
+                    
+                    console.log('Submitting upgrade request:', { requestedRole, message });
+                    
+                    const response = await fetch(`${window.location.origin}/api/role-upgrade/request`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            requestedRole,
+                            message: message || undefined
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    console.log('Upgrade request response:', result);
+                    
+                if (result.success) {
+                    alert('✅ Role upgrade request submitted successfully!\n\nAn Almighty or SuperAdmin administrator will review your request. You will be notified once it\'s processed.');
+                    // Clear form
+                    document.getElementById('upgradeMessage').value = '';
+                    // Reload status to show pending request
+                    loadUpgradeRequestStatus();
+                    
+                    // Set up more frequent check for role changes (in case request is approved quickly)
+                    // Check every 5 seconds for role changes
+                    let checkCount = 0;
+                    const maxChecks = 60; // Check for 5 minutes (60 * 5 seconds)
+                    const roleCheckInterval = setInterval(async function() {
+                        checkCount++;
+                        console.log(`Checking for role change (attempt ${checkCount}/${maxChecks})...`);
+                        const refreshedUser = await refreshUserData();
+                        if (refreshedUser && refreshedUser.role !== 'Guest') {
+                            console.log('✅ Role changed detected! User is now:', refreshedUser.role);
+                            clearInterval(roleCheckInterval);
+                            // Show success message and reload
+                            alert('✅ Your account has been elevated! You are now a ' + refreshedUser.role + '. Refreshing page...');
+                            window.location.reload();
+                        } else if (checkCount >= maxChecks) {
+                            console.log('Stopping role check - max attempts reached');
+                            clearInterval(roleCheckInterval);
+                        }
+                    }, 5000); // Check every 5 seconds
+                } else {
+                        alert('❌ ' + (result.message || 'Error submitting request'));
+                        // Re-enable submit button
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '📤 Request Elevation to User Role';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error submitting upgrade request:', error);
+                    alert('❌ Error submitting request. Please try again.');
+                    // Re-enable submit button
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '📤 Request Elevation to User Role';
+                    }
+                }
+            });
+        } else {
+            console.error('Role upgrade form not found in DOM');
         }
         
         /**
@@ -881,6 +1713,6 @@
             return div.innerHTML;
         }
     </script>
+    <script src="pwa.js"></script>
 </body>
 </html>
-

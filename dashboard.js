@@ -48,6 +48,7 @@ function initDashboard() {
     
     // Load user posts
     loadUserPosts();
+    loadBookmarkedCards();
 }
 
 /**
@@ -174,6 +175,81 @@ async function loadUserPosts() {
         // Display error message
         postsList.innerHTML = `<div class="no-posts" style="color: #dc3545;">Error loading posts: ${escapeHtml(error.message)}</div>`;
     }
+}
+
+/**
+ * ============================================
+ * Load Bookmarked Cards
+ * ============================================
+ */
+async function loadBookmarkedCards() {
+    const bookmarksList = document.getElementById('bookmarksList');
+    const bookmarksLoading = document.getElementById('bookmarksLoading');
+    if (!bookmarksList || !bookmarksLoading) return;
+
+    bookmarksLoading.style.display = 'block';
+    bookmarksList.innerHTML = '';
+
+    try {
+        const response = await authAPI.request('/users/bookmarks?limit=100');
+        const people = response?.data?.people || [];
+
+        bookmarksLoading.style.display = 'none';
+
+        if (people.length === 0) {
+            bookmarksList.innerHTML = '<div class="no-posts" data-i18n="dashboard.noBookmarkedCards">No bookmarked cards yet.</div>';
+            if (window.languageManager) window.languageManager.translatePage?.();
+            return;
+        }
+
+        const html = people.map((person) => {
+            const fullName = person.familyName
+                ? `${escapeHtml(person.name || '')} ${escapeHtml(person.familyName)}`
+                : escapeHtml(person.name || '');
+            const address = getBookmarkedAddressText(person);
+            const tags = Array.isArray(person.tags) ? person.tags.join(', ') : '';
+            const ownerName = typeof person.createdBy === 'object'
+                ? (person.createdBy.username || person.createdBy.email || 'Unknown')
+                : 'Unknown';
+
+            return `
+                <div class="post-card" data-post-id="${person._id}">
+                    <div class="post-card-header">
+                        <div>
+                            <h3 class="post-card-title">${fullName || 'Untitled'}</h3>
+                        </div>
+                        <div class="post-card-actions">
+                            <button class="btn-edit" onclick="openBookmarkedCard('${person._id}')">Open</button>
+                            <button class="btn-delete" onclick="removeBookmarkedCard('${person._id}', '${(fullName || '').replace(/'/g, "\\'")}')">Remove</button>
+                        </div>
+                    </div>
+                    ${Array.isArray(person.images) && person.images.length > 0
+                        ? `<div class="post-card-images"><img src="${escapeHtml(person.images[0])}" alt="Bookmarked card image" class="person-thumbnail" onclick="openImageModal('${String(person.images[0]).replace(/'/g, "\\'")}')"></div>`
+                        : ''}
+                    <div class="post-card-content">
+                        <div class="post-card-field"><label>Address:</label><div class="value">${escapeHtml(address)}</div></div>
+                        <div class="post-card-field"><label>Owner:</label><div class="value">${escapeHtml(ownerName)}</div></div>
+                        ${tags ? `<div class="post-card-field"><label>Tags:</label><div class="value">${escapeHtml(tags)}</div></div>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        bookmarksList.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading bookmarked cards:', error);
+        bookmarksLoading.style.display = 'none';
+        bookmarksList.innerHTML = `<div class="no-posts" style="color: #dc3545;">Error loading bookmarked cards: ${escapeHtml(error.message || 'Unknown error')}</div>`;
+    }
+}
+
+function getBookmarkedAddressText(person) {
+    const exact = (person?.address || '').trim();
+    if (exact) return exact;
+    const section = (person?.approximateRegion?.section || '').trim();
+    const province = (person?.approximateRegion?.province || '').trim();
+    const approx = [section, province].filter(Boolean).join(', ');
+    return approx || 'No address';
 }
 
 /**
@@ -561,6 +637,36 @@ function viewUserPosts(userId) {
 }
 
 /**
+ * Open bookmarked card on map page.
+ * @param {string} personId
+ */
+function openBookmarkedCard(personId) {
+    if (!personId) return;
+    window.location.href = `index.html?person=${encodeURIComponent(personId)}`;
+}
+
+/**
+ * Remove card from current user's bookmarks.
+ * @param {string} personId
+ * @param {string} personName
+ */
+async function removeBookmarkedCard(personId, personName) {
+    if (!personId) return;
+    const confirmed = confirm(`Remove "${personName || 'this card'}" from bookmarks?`);
+    if (!confirmed) return;
+
+    try {
+        await authAPI.request(`/users/bookmarks/${encodeURIComponent(personId)}`, {
+            method: 'DELETE'
+        });
+        await loadBookmarkedCards();
+    } catch (error) {
+        console.error('Error removing bookmark:', error);
+        alert(`Error removing bookmark: ${error.message}`);
+    }
+}
+
+/**
  * ============================================
  * Close Image Modal
  * ============================================
@@ -595,4 +701,3 @@ if (document.readyState === 'loading') {
 } else {
     initDashboard();
 }
-

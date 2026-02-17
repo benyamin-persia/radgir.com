@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#243C4C">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Radgir">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <title data-i18n="publicProfile.title">پروفایل کاربر - رادگیر</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <script src="translations.js"></script>
+    <script src="i18n.js"></script>
+    <script src="theme.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: var(--background-alt);
+            min-height: 100vh;
+        }
+
+        .public-profile-page {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 16px 32px;
+            display: grid;
+            gap: 20px;
+        }
+
+        .public-profile-card,
+        .public-posts-card {
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .public-profile-top {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .public-profile-avatar {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            background: var(--background-alt);
+        }
+
+        .public-profile-avatar-fallback {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: var(--text-light);
+            background: var(--background-alt);
+        }
+
+        .public-profile-title {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .public-profile-subtitle {
+            margin: 4px 0 0;
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .public-profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .public-profile-item {
+            background: var(--background-alt);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .public-profile-item-label {
+            margin: 0 0 4px;
+            font-size: 0.82rem;
+            color: var(--text-light);
+        }
+
+        .public-profile-item-value {
+            margin: 0;
+            color: var(--text-color);
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .public-profile-actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .public-btn {
+            border: 1px solid var(--border-color);
+            background: var(--background-alt);
+            color: var(--text-color);
+            border-radius: 8px;
+            padding: 8px 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+        }
+
+        .public-btn-primary {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: #fff;
+        }
+
+        .public-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .public-posts-header {
+            margin: 0 0 12px;
+            color: var(--primary-color);
+            font-size: 1.25rem;
+        }
+
+        .public-posts-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .public-post-card {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--background-alt);
+            padding: 12px;
+            display: grid;
+            grid-template-columns: 92px 1fr;
+            gap: 12px;
+        }
+
+        .public-post-image {
+            width: 92px;
+            height: 92px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #111;
+        }
+
+        .public-post-title {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.08rem;
+        }
+
+        .public-post-meta,
+        .public-post-tags {
+            margin: 6px 0 0;
+            color: var(--text-light);
+            font-size: 0.92rem;
+            line-height: 1.45;
+        }
+
+        .public-post-actions {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .public-post-empty {
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .public-page-message {
+            margin: 0;
+            color: var(--text-light);
+        }
+
+        @media (max-width: 720px) {
+            .public-profile-page {
+                margin-top: 14px;
+                padding: 0 10px 20px;
+            }
+
+            .public-post-card {
+                grid-template-columns: 1fr;
+            }
+
+            .public-post-image {
+                width: 100%;
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">📍 Radgir</div>
+            <ul class="nav-links"></ul>
+            <div class="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main class="public-profile-page">
+        <section class="public-profile-card">
+            <p class="public-page-message" id="publicProfileStatus" data-i18n="publicProfile.loading">در حال بارگذاری پروفایل...</p>
+            <div id="publicProfileContent" style="display:none;">
+                <div class="public-profile-top">
+                    <img id="publicProfileAvatar" class="public-profile-avatar" alt="User avatar" style="display:none;">
+                    <div id="publicProfileAvatarFallback" class="public-profile-avatar-fallback">👤</div>
+                    <div>
+                        <h1 class="public-profile-title" id="publicProfileUsername">-</h1>
+                        <p class="public-profile-subtitle" id="publicProfileRole">-</p>
+                        <p class="public-profile-subtitle" id="publicProfileSince">-</p>
+                    </div>
+                </div>
+
+                <div class="public-profile-grid">
+                    <div class="public-profile-item">
+                        <p class="public-profile-item-label" data-i18n="publicProfile.fullName">نام کامل</p>
+                        <p class="public-profile-item-value" id="publicProfileFullName">-</p>
+                    </div>
+                    <div class="public-profile-item">
+                        <p class="public-profile-item-label" data-i18n="publicProfile.location">موقعیت</p>
+                        <p class="public-profile-item-value" id="publicProfileLocation">-</p>
+                    </div>
+                    <div class="public-profile-item">
+                        <p class="public-profile-item-label" data-i18n="publicProfile.website">وب‌سایت</p>
+                        <p class="public-profile-item-value" id="publicProfileWebsite">-</p>
+                    </div>
+                    <div class="public-profile-item">
+                        <p class="public-profile-item-label" data-i18n="publicProfile.postsCount">تعداد فهرست‌ها</p>
+                        <p class="public-profile-item-value" id="publicProfilePostsCount">0</p>
+                    </div>
+                    <div class="public-profile-item" style="grid-column: 1 / -1;">
+                        <p class="public-profile-item-label" data-i18n="publicProfile.bio">درباره کاربر</p>
+                        <p class="public-profile-item-value" id="publicProfileBio">-</p>
+                    </div>
+                </div>
+
+                <div class="public-profile-actions">
+                    <button type="button" class="public-btn public-btn-primary" id="publicMessageBtn" data-i18n="publicProfile.sendMessage">ارسال پیام</button>
+                    <a class="public-btn" id="publicDashboardBtn" href="dashboard.html#messagesSection" data-i18n="publicProfile.openInbox" style="display:none;">باز کردن صندوق پیام</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="public-posts-card">
+            <h2 class="public-posts-header" data-i18n="publicProfile.postsTitle">فهرست‌های ثبت‌شده</h2>
+            <div class="public-posts-list" id="publicPostsList"></div>
+            <div style="margin-top: 12px;">
+                <button type="button" class="public-btn" id="publicLoadMoreBtn" data-i18n="publicProfile.loadMore" style="display:none;">بارگذاری بیشتر</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+    <script src="analytics.js"></script>
+    <script src="auth.js"></script>
+    <script src="navigation.js"></script>
+    <script src="public-profile.js"></script>
+    <script src="pwa.js"></script>
+</body>
+</html>

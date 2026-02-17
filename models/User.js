@@ -17,7 +17,7 @@ const { getDefaultPermissionsForRole } = require('../utils/permissions');
 
 /**
  * User Schema Definition
- * This schema represents a user in the hierarchical authentication system
+ * This schema represents a user in the Radgir system
  * 
  * Schema Fields:
  * - username: Unique identifier for the user
@@ -201,6 +201,43 @@ const userSchema = new mongoose.Schema({
         notes: {
             type: String,
             trim: true
+        },
+        allowDirectMessages: {
+            type: Boolean,
+            default: true
+        },
+        aboutContact: {
+            headline: {
+                type: String,
+                trim: true,
+                maxlength: [200, 'Headline cannot exceed 200 characters']
+            },
+            summary: {
+                type: String,
+                trim: true,
+                maxlength: [4000, 'Summary cannot exceed 4000 characters']
+            },
+            position: {
+                type: String,
+                trim: true,
+                maxlength: [5000, 'Position cannot exceed 5000 characters']
+            },
+            seeking: {
+                type: String,
+                trim: true,
+                maxlength: [2000, 'Seeking text cannot exceed 2000 characters']
+            },
+            contactPrompt: {
+                type: String,
+                trim: true,
+                maxlength: [500, 'Contact prompt cannot exceed 500 characters']
+            },
+            email: {
+                type: String,
+                trim: true,
+                lowercase: true,
+                match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email address']
+            }
         }
     },
     
@@ -377,6 +414,4 @@ userSchema.statics.getRoleLevel = function(role) {
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
-
-
 
